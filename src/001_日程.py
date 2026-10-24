@@ -1,3 +1,5 @@
+# python -m streamlit run c:\Users\izmr3\github\tkb_2626\src\001_日程.py
+
 import time
 from datetime import datetime, timedelta
 import streamlit as st

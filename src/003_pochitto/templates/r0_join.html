@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}日程の回答{% endblock %}
+{% block content %}
+<span class="star" style="top:90px;right:40px">★</span>
+<div style="margin-top:16px">
+  <span class="chip chip-soft">{{ event.sender_name }} から</span>
+  <span class="chip {{ PRIORITY[event.priority].cls }}">{{ PRIORITY[event.priority].label }}</span>
+</div>
+<h1 class="display">{{ event.title }}</h1>
+<p class="sub">日程調整が届いてるよ。まず、あなたはどれ？</p>
+
+<form method="post" action="{{ url_for('join_post', eid=event.id) }}">
+  {% if open_slots %}
+  <div class="chips" style="gap:10px">
+    {% for r in open_slots %}
+    <label class="chip-radio"><input type="radio" name="rid" value="{{ r.id }}"
+      {% if preselect == r.id %}checked{% endif %}><span>{{ r.name }}</span></label>
+    {% endfor %}
+  </div>
+  <p class="small muted" style="margin:18px 0 6px">リストにいない？</p>
+  {% endif %}
+  {% if user %}
+  <label class="chip-radio"><input type="radio" name="rid" value="" {% if not open_slots or not preselect %}checked{% endif %}>
+    <span>{{ user.name }} として答える</span></label>
+  {% else %}
+  <input class="input" name="name" maxlength="20" placeholder="あなたの名前" id="name">
+  {% endif %}
+  <div class="sticky-bottom"><button class="btn btn-main">つぎへ</button></div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+// 名前を打ち始めたらメンバー選択を外す
+const nameEl = document.getElementById("name");
+if (nameEl) nameEl.addEventListener("input", () =>
+  document.querySelectorAll("[name=rid]").forEach(r => r.checked = false));
+document.querySelectorAll("[name=rid]").forEach(r => r.addEventListener("change", () => { if (nameEl) nameEl.value = ""; }));
+</script>
+{% endblock %}

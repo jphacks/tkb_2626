@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block page_title %}送ったよ！ | ポチッと日程{% endblock %}
+{% block content %}
+<span class="star" style="top:96px;left:60px">★</span>
+<span class="star blue" style="top:150px;right:70px">★</span>
+<div class="big-check">✓</div>
+<h1 class="display center" style="margin-top:6px">送ったよ！</h1>
+<p class="sub center">{{ event.sender_name }}さんに届きました。おつかれさま。</p>
+
+<div class="card flat">
+  <div class="small muted" style="margin-bottom:6px">あなたの回答</div>
+  {% for sl in event.slots %}{% set m = r.answers.get(sl.id, 'x') %}
+  <div class="answer-row"><span class="mark-icon {{ m }}">{{ MARK[m] }}</span>{{ fmt_date(sl.date) }}<span class="t">{{ sl.start }}–{{ sl.end }}</span></div>
+  {% endfor %}
+  {% if r.note %}<div class="note-box" style="margin-top:8px"><div class="small muted">備考</div>{{ r.note }}</div>{% endif %}
+</div>
+
+<div class="sticky-bottom">
+  {% if closed %}
+  <p class="center small muted">締切（{{ fmt_dt(event.deadline) }}）をすぎたので、変えたいときは{{ event.sender_name }}さんに直接伝えてね</p>
+  <a class="btn" href="{{ url_for('home') }}">ホームへ</a>
+  {% else %}
+  <a class="btn" href="{{ url_for('answer', eid=event.id) }}">回答を変更する</a>
+  <p class="center small muted" style="margin:10px 0 0">締切（{{ fmt_dt(event.deadline) }}）までは何度でも変更できます</p>
+  {% endif %}
+</div>
+{% endblock %}

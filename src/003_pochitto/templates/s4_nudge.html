@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}{% if targets|length == 1 %}{{ targets[0].name }}さんを催促{% else %}まだの{{ targets|length }}人を催促{% endif %}{% endblock %}
+{% block back %}<a class="back" href="{{ url_for('status', token=event.admin_token) }}">‹</a>{% endblock %}
+{% block content %}
+{% for r in targets %}
+<div class="card person" style="padding:12px 14px">
+  <span class="avatar">{{ r.initial }}</span>
+  <div class="info">
+    <div class="name">{{ r.name }} さん</div>
+    <div class="line muted">{{ r.status }}{% if r.promise_text %}・{{ r.promise_text }}{% endif %}</div>
+  </div>
+</div>
+{% endfor %}
+
+<label class="label" for="msg">ひとこと（相手の画面に降ってくる）</label>
+<input class="input" id="msg" maxlength="20" value="はよ〜〜！">
+<div class="chips" style="margin-top:10px">
+  {% for w in ["まだ〜？", "おねがい！", "待ってるよ", "ジュース奢る", "はよ〜〜！"] %}
+  <button type="button" class="chip" data-word="{{ w }}">{{ w }}</button>
+  {% endfor %}
+</div>
+
+<div class="tap-zone" id="zone">
+  <div class="tap-count"><span id="count">0</span><small>連</small></div>
+  <button class="tap-btn" id="tap" type="button">連打<small>タップ！</small></button>
+  <div class="bonus-pill" id="bonus">あと100連で100連ボーナス！</div>
+</div>
+
+<div class="sticky-bottom">
+  <button class="btn btn-main" id="send" disabled>連打してから送ってね</button>
+  <p class="center small muted" style="margin:8px 0 0">送るとプレゼントリンクができて、LINE/Slackで渡せます</p>
+</div>
+{% endblock %}
+
+{% block outside %}
+<div class="sheet-bg" id="sheet">
+  <div class="sheet-panel">
+    <h2 class="display" style="font-size:22px;margin-top:0">プレゼント、できた！</h2>
+    <p class="sub" id="sheet-sub"></p>
+    <div id="sheet-list"></div>
+    <a class="btn btn-ghost" href="{{ url_for('status', token=event.admin_token) }}" style="margin-top:8px">回答状況にもどる</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const TARGET_IDS = {{ targets|map(attribute='id')|list|tojson }};
+const SENDER = {{ event.sender_name|tojson }};
+const msgEl = document.getElementById("msg");
+const zone = document.getElementById("zone");
+const tapBtn = document.getElementById("tap");
+const countEl = document.getElementById("count");
+const bonusEl = document.getElementById("bonus");
+const sendBtn = document.getElementById("send");
+let count = 0;
+
+document.querySelectorAll("[data-word]").forEach(b => b.onclick = () => { msgEl.value = b.dataset.word; });
+const word = () => msgEl.value.trim() || "はよ〜〜！";
+
+function spawnBubble() {
+  const b = document.createElement("div");
+  b.className = "bubble pop v" + Math.floor(Math.random() * 4);
+  b.textContent = word();
+  b.style.left = (12 + Math.random() * 76) + "%";
+  b.style.top = (18 + Math.random() * 70) + "%";
+  b.style.setProperty("--r", (Math.random() * 24 - 12) + "deg");
+  zone.appendChild(b);
+  setTimeout(() => b.remove(), 900);
+}
+
+function celebrate(n) {
+  const burst = document.createElement("div");
+  burst.className = "burst"; burst.textContent = n + "連達成！！";
+  document.body.appendChild(burst);
+  setTimeout(() => burst.remove(), 1700);
+  for (let i = 0; i < 40; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.textContent = ["★", "✦", "●", "▲"][i % 4];
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.color = ["#F7C36D", "#3A51D0", "#FF7B6B", "#fff"][i % 4];
+    c.style.animationDuration = (1.5 + Math.random() * 1.5) + "s";
+    c.style.animationDelay = Math.random() * .4 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3500);
+  }
+  document.querySelector(".app").classList.add("shake");
+  setTimeout(() => document.querySelector(".app").classList.remove("shake"), 400);
+  Pochi.buzz([60, 40, 120]);
+}
+
+function render() {
+  countEl.textContent = count;
+  const next = Math.ceil((count + 1) / 100) * 100;
+  bonusEl.textContent = count >= 100 && count % 100 === 0
+    ? `🎉 ${count}連ボーナス！`
+    : `あと${next - count}連で${next}連ボーナス！`;
+  zone.classList.toggle("fever", count >= 100);
+  sendBtn.disabled = count === 0;
+  sendBtn.textContent = count ? `${count}コの${word()}をプレゼントで送る` : "連打してから送ってね";
+}
+
+function hit() {
+  if (count >= 9999) return;
+  count++;
+  spawnBubble();
+  Pochi.buzz();
+  tapBtn.classList.add("hit");
+  setTimeout(() => tapBtn.classList.remove("hit"), 60);
+  if (count % 100 === 0) celebrate(count);
+  render();
+}
+// pointerdown のほうが click より連打に強い
+tapBtn.addEventListener("pointerdown", e => { e.preventDefault(); hit(); });
+document.addEventListener("keydown", e => { if (e.code === "Space" && document.activeElement !== msgEl) { e.preventDefault(); hit(); } });
+msgEl.addEventListener("input", render);
+
+sendBtn.onclick = async () => {
+  sendBtn.disabled = true;
+  try {
+    const res = await Pochi.postJSON({{ url_for('create_presents', token=event.admin_token)|tojson }},
+      { receiver_ids: TARGET_IDS, message: word(), count });
+    document.getElementById("sheet-sub").textContent =
+      `${res.count}コの「${res.message}」を詰めたよ。リンクを相手に渡してね。`;
+    const list = document.getElementById("sheet-list");
+    list.innerHTML = "";
+    for (const p of res.presents) {
+      const text = `${SENDER}から${p.name}さんへプレゼントが届いてるよ🎁`;
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<div style="font-weight:900;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-accent btn-sm" style="flex:1">LINEで送る</button>
+          <button class="btn btn-sm" style="flex:1">コピー</button>
+        </div>`;
+      card.firstElementChild.textContent = `🎁 ${p.name}さん宛て`;
+      const [lineBtn, copyBtn] = card.querySelectorAll("button");
+      lineBtn.onclick = () => Pochi.lineShare(text + "\n" + p.url);
+      copyBtn.onclick = () => Pochi.copy(text + "\n" + p.url);
+      list.appendChild(card);
+    }
+    document.getElementById("sheet").classList.add("open");
+  } catch (e) {
+    Pochi.toast("送れなかった…もう一回ためしてね");
+  } finally {
+    sendBtn.disabled = false;
+  }
+};
+render();
+</script>
+{% endblock %}

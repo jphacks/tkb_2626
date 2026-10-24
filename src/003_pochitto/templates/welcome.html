@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}はじめに{% endblock %}
+{% block content %}
+<span class="star" style="top:70px;right:40px">★</span>
+<span class="star blue" style="top:110px;right:70px">★</span>
+<h1 class="display xl">なんて<br>呼べばいい？</h1>
+<p class="sub">ログインはいらないよ。名前だけ教えて。<br>この端末で覚えておくね。</p>
+{% if error %}<p class="errors">{{ error }}</p>{% endif %}
+<form method="post">
+  <input type="hidden" name="next" value="{{ next }}">
+  <input class="input" name="name" maxlength="20" placeholder="あやは" required autofocus>
+  <div class="sticky-bottom"><button class="btn btn-main">つぎへ</button></div>
+</form>
+{% endblock %}

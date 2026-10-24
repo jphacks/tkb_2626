@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}ホーム{% endblock %}
+{% block content %}
+<span class="star" style="top:76px;right:34px">★</span>
+<h1 class="display">おつかれ、{{ user.name }}！</h1>
+<div class="chips">
+  <span class="chip chip-coral">返事待ち {{ waiting_people }}人</span>
+  <span class="chip chip-accent">あなたの回答待ち {{ my_todo }}件</span>
+</div>
+
+<div class="section-head">自分が作った調整 <span class="count-dot">{{ created|length }}</span></div>
+{% for c in created %}
+<a class="card" href="{{ url_for('status', token=c.event.admin_token) }}">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span class="chip chip-soft">自分が作成</span>
+    {% if c.pending %}<span class="chip chip-coral">まだ{{ c.pending }}人</span>
+    {% else %}<span class="chip chip-main">全員回答！</span>{% endif %}
+  </div>
+  <div style="font-weight:900;font-size:17px;margin:10px 0">{{ c.event.title }}</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="progress" style="flex:1"><i style="width:{{ c.pct }}%"></i></div>
+    <span class="small">{{ c.done }}/{{ c.total }}人</span>
+  </div>
+  <div class="small muted" style="margin-top:8px">🕒 締切 {{ fmt_dt(c.event.deadline) }}・{{ c.remaining }}</div>
+</a>
+{% else %}
+<p class="note-box">まだ作った調整はないよ。右下の ＋ から作ってみよう。</p>
+{% endfor %}
+
+<div class="section-head">届いた調整 <span class="count-dot accent">{{ received|length }}</span></div>
+{% for x in received %}
+<a class="card" href="{{ url_for('answer', eid=x.event.id) }}">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span class="chip chip-accent">{{ x.event.sender_name }} から</span>
+    {% if x.receiver.answered_at %}<span class="chip chip-main">回答済</span>
+    {% else %}<span class="chip chip-coral">未回答</span>{% endif %}
+  </div>
+  <div style="font-weight:900;font-size:17px;margin:10px 0 6px">{{ x.event.title }}</div>
+  <div class="small muted">🕒 締切 {{ fmt_dt(x.event.deadline) }}・候補{{ x.event.slots|length }}つ</div>
+</a>
+{% else %}
+<p class="note-box">届いた調整はまだないよ。</p>
+{% endfor %}
+{% endblock %}
+{% block outside %}<a class="fab" href="{{ url_for('new_event') }}" aria-label="新しい日程調整">＋</a>{% endblock %}

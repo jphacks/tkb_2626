@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block page_title %}{% block title %}{% endblock %} | ポチッと日程{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <main class="app {% block app_class %}{% endblock %}">
+    {% block topbar %}
+    <header class="topbar">
+      {% block back %}{% endblock %}
+      <span class="title">{{ self.title() }}</span>
+      <a class="logo" href="{{ url_for('home') }}">ポチッと日程</a>
+    </header>
+    {% endblock %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block outside %}{% endblock %}
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

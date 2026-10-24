@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block page_title %}プレゼントが届いてるよ！ | ポチッと日程{% endblock %}
+{% block app_class %}blue{% endblock %}
+{% block topbar %}{% endblock %}
+{% block content %}
+<span class="star" style="top:80px;left:30px;font-size:28px">★</span>
+<span class="star white" style="top:60px;right:50px">★</span>
+<span class="star" style="top:30px;left:52%;font-size:12px">★</span>
+<span class="star white" style="bottom:120px;left:30px">★</span>
+<span class="star" style="bottom:160px;right:40px">★</span>
+
+<section id="stage-closed" class="center" style="padding-top:22vh">
+  <span class="chip chip-accent tilt">{{ p.from_name }} から</span>
+  <h1 class="display" style="margin:16px 0 0;position:relative">プレゼントが<br>届いてるよ！
+    <span class="chip chip-coral" style="position:absolute;right:6px;bottom:-26px;transform:rotate(-8deg)">{{ p.count }}連</span>
+  </h1>
+  <div class="gift-wrap" id="gift" role="button" tabindex="0" aria-label="プレゼントを開ける">
+    <div class="gift" id="gift-box">
+      <div class="lid"><div class="ribbon"></div><div class="bow"></div></div>
+      <div class="box"><div class="ribbon"></div></div>
+    </div>
+  </div>
+  <p style="font-weight:800">タップして開ける</p>
+</section>
+
+<div class="rain" id="rain"></div>
+<div class="reveal-card" id="reveal">
+  <div><span class="num">{{ p.count }}</span><span style="font-weight:900">コの</span></div>
+  <div class="msg">{{ p.message }}</div>
+  <div class="small" style="margin-top:8px;font-weight:700">{{ p.from_name }}より</div>
+</div>
+<div class="auto-next" id="auto-next">
+  <div class="progress"><i id="bar"></i></div>
+  <span id="auto-text">3秒後に回答画面へ…</span>
+  <div><a href="{{ next_url }}" style="font-weight:800">いますぐ答える →</a></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const COUNT = {{ p.count }};
+const WORD = {{ p.message|tojson }};
+const NEXT = {{ next_url|tojson }};
+let opened = false;
+
+function openGift() {
+  if (opened) return;
+  opened = true;
+  Pochi.buzz([30, 30, 60]);
+  fetch({{ url_for('present_open', pid=p.id)|tojson }}, { method: "POST" });
+  document.getElementById("gift-box").classList.add("open");
+  setTimeout(() => {
+    document.getElementById("stage-closed").classList.add("hidden");
+    document.querySelector(".app").classList.replace("blue", "navy");
+    rain();
+  }, 550);
+}
+
+function rain() {
+  const box = document.getElementById("rain");
+  // 降らせる数は最大 140 個に間引く（それ以上は端末が重くなる）
+  const n = Math.min(COUNT, 140);
+  const spread = Math.min(2.2, 0.4 + n * 0.02);   // 数が多いほど長く降る
+  for (let i = 0; i < n; i++) {
+    const b = document.createElement("div");
+    b.className = "bubble v" + Math.floor(Math.random() * 4) + (Math.random() < .15 ? " big" : "");
+    b.textContent = WORD;
+    b.style.left = (Math.random() * 86) + "%";
+    b.style.top = (4 + Math.random() * 88) + "%";
+    b.style.setProperty("--r", (Math.random() * 30 - 15) + "deg");
+    b.style.setProperty("--d", (0.7 + Math.random() * 0.6) + "s");
+    b.style.setProperty("--delay", (Math.random() * spread) + "s");
+    box.appendChild(b);
+  }
+  if (COUNT >= 100) {                 // 100連以上は特殊演出
+    setTimeout(() => document.querySelector(".app").classList.add("shake"), spread * 1000);
+  }
+  setTimeout(reveal, (spread + 0.9) * 1000);
+}
+
+function reveal() {
+  document.getElementById("reveal").classList.add("show");
+  const next = document.getElementById("auto-next");
+  next.style.display = "block";
+  const bar = document.getElementById("bar");
+  const text = document.getElementById("auto-text");
+  const total = 3000, start = performance.now();
+  (function tick(t) {
+    const p = Math.min(1, (t - start) / total);
+    bar.style.width = (p * 100) + "%";
+    text.textContent = `${Math.ceil(3 - p * 3)}秒後に回答画面へ…`;
+    if (p < 1) requestAnimationFrame(tick); else location.href = NEXT;
+  })(start);
+}
+
+const gift = document.getElementById("gift");
+gift.addEventListener("click", openGift);
+gift.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openGift(); });
+</script>
+{% endblock %}

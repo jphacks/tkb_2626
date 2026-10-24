@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}はじめに{% endblock %}
+{% block content %}
+<span class="star" style="top:84px;left:26px">★</span>
+<span class="star blue" style="top:74px;right:60px">★</span>
+<div class="cal-art" aria-hidden="true">
+  <div class="sheet s1"></div><div class="sheet s2"></div><div class="sheet s3"></div>
+  <span class="chip chip-accent tilt">○ 空いてる！</span>
+</div>
+<h1 class="display">予定、のぞいても<br>いい？</h1>
+<p class="sub">カレンダーを見て、AIが○△×を先に埋めておくよ。あなたは確認して送るだけ。</p>
+
+<form method="post">
+  <input type="hidden" name="next" value="{{ next }}">
+  <button class="btn btn-main" name="provider" value="google">Googleカレンダーをつなぐ</button>
+  <button class="btn" name="provider" value="outlook">Outlookをつなぐ</button>
+  <button class="btn" name="provider" value="icloud">iCloudカレンダーをつなぐ</button>
+  <p class="note-box" style="margin-top:22px">✔︎ 予定の中身は相手に見えません。空いてる／埋まってるだけを使います。</p>
+  <button class="btn btn-ghost" name="provider" value="skip" style="margin-top:10px">今回はスキップして手で答える</button>
+</form>
+{% endblock %}

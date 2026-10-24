@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}日程の回答{% endblock %}
+{% block back %}<a class="back" href="{{ url_for('home') }}">‹</a>{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="chips">
+    <span class="chip chip-soft">{{ event.sender_name }} から</span>
+    <span class="chip {{ PRIORITY[event.priority].cls }}">{{ PRIORITY[event.priority].label }}</span>
+  </div>
+  <h1 class="display" style="font-size:22px;margin:10px 0">{{ event.title }}</h1>
+  <div class="ai-box"><span class="sparkle">✦</span><span>{{ summary }}</span></div>
+</div>
+
+{% if not r.answered_at %}
+<div class="card yellow flat" style="margin-top:14px">
+  <div class="small" style="font-weight:800;margin-bottom:10px">今すぐ無理なら、返す時間だけ宣言しとこ</div>
+  <div class="chips" id="promise">
+    {% for key, label in PROMISE_OPTIONS %}
+    <button type="button" class="chip {% if r.promise and r.promise.label == label %}on{% endif %}" data-kind="{{ key }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<form method="post" id="answer-form">
+  <div class="section-head" style="justify-content:space-between">
+    {% if ai %}<span><span class="sparkle">✦</span> AIが埋めておいたよ</span><span class="small muted">違ったらタップで修正</span>
+    {% elif r.answered_at %}<span>前回の回答</span><span class="small muted">タップで変更</span>
+    {% else %}<span>○△×をえらんでね</span>
+      {% if user.calendar == 'skip' %}<a class="small muted" href="{{ url_for('connect', next=request.path) }}">カレンダーをつなぐ</a>{% endif %}
+    {% endif %}
+  </div>
+
+  {% for sl in event.slots %}
+  {% set cur = r.answers.get(sl.id) or (ai[sl.id].mark if sl.id in ai else none) %}
+  <div class="card slot-card">
+    <div class="when">
+      <div class="day">{{ fmt_date(sl.date) }}</div>
+      <div class="time">{{ sl.start }}–{{ sl.end }}</div>
+      {% if sl.id in ai %}<div class="reason">✦ {{ ai[sl.id].reason }}</div>{% endif %}
+    </div>
+    <div class="marks" role="radiogroup" aria-label="{{ fmt_slot(sl) }}">
+      {% for m in ["o", "t", "x"] %}
+      <label class="mark"><input type="radio" name="mark_{{ sl.id }}" value="{{ m }}" {% if cur == m %}checked{% endif %} required><span>{{ MARK[m] }}</span></label>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <label class="label" for="note">備考（任意）</label>
+  <textarea class="input" id="note" name="note" maxlength="200" placeholder="11/2は15分くらい遅れるかも！">{{ r.note }}</textarea>
+
+  <div class="sticky-bottom"><button class="btn btn-main">これで送る</button></div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll("#promise [data-kind]").forEach(btn => btn.onclick = async () => {
+  try {
+    const res = await Pochi.postJSON({{ url_for('promise', eid=event.id)|tojson }}, { kind: btn.dataset.kind });
+    document.querySelectorAll("#promise .chip").forEach(c => c.classList.toggle("on", c === btn));
+    Pochi.toast(btn.dataset.kind === "now" ? "よし、いま答えよう！" : `「${res.label}までに返す」って伝えたよ`);
+    if (btn.dataset.kind === "now") document.getElementById("answer-form").scrollIntoView({ behavior: "smooth" });
+  } catch { Pochi.toast("うまく伝えられなかった…"); }
+});
+document.getElementById("answer-form").addEventListener("invalid", e => {
+  Pochi.toast("まだ選んでない候補があるよ");
+}, true);
+</script>
+{% endblock %}

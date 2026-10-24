@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block page_title %}できた！ | ポチッと日程{% endblock %}
+{% block app_class %}blue{% endblock %}
+{% block back %}<a class="back" href="{{ url_for('home') }}">‹</a>{% endblock %}
+{% block content %}
+<span class="star" style="top:96px;left:24px;font-size:30px">★</span>
+<span class="star white" style="top:80px;right:40px;font-size:20px">★</span>
+<div class="center" style="margin-top:40px">
+  <span class="chip chip-accent tilt">{{ event.title }}</span>
+  <h1 class="display xl" style="margin-top:18px">できた！</h1>
+  <p class="sub">このリンクを、LINEやSlackに貼るだけ。<br>相手はログインなしで答えられるよ。</p>
+</div>
+
+<div class="url-box" style="margin:26px 0 22px">
+  <code>{{ share_url }}</code>
+  <button class="icon-btn" type="button" onclick="Pochi.copy(SHARE_URL)" aria-label="コピー">⧉</button>
+</div>
+<button class="btn btn-accent" onclick="Pochi.lineShare(SHARE_TEXT + '\n' + SHARE_URL)">LINEで送る</button>
+<button class="btn" onclick="Pochi.copy(SHARE_TEXT + '\n' + SHARE_URL, 'コピーしたよ！Slackに貼ってね')">Slackで送る</button>
+<button class="btn" onclick="Pochi.share(SHARE_TEXT, SHARE_URL)">その他にシェア</button>
+
+<div class="card flat" style="margin-top:28px;background:var(--main-dark);color:#fff;border-color:#fff">
+  <div class="small" style="font-weight:800">🔑 このイベントの管理用URL</div>
+  <p class="small" style="margin:6px 0 10px;opacity:.85">ホームからも開けるけど、別の端末で見るときはこれを使ってね。人には送らないで。</p>
+  <button class="btn btn-sm" type="button" onclick="Pochi.copy(ADMIN_URL)">管理用URLをコピー</button>
+</div>
+
+<p class="center" style="margin-top:28px"><a href="{{ url_for('status', token=event.admin_token) }}" style="font-weight:800;text-decoration:none">回答状況を見る →</a></p>
+{% endblock %}
+{% block scripts %}
+<script>
+const SHARE_URL = {{ share_url|tojson }};
+const ADMIN_URL = {{ admin_url|tojson }};
+const SHARE_TEXT = {{ ("【" ~ event.title ~ "】の日程、ポチッと答えてね！締切は" ~ fmt_dt(event.deadline) ~ "だよ")|tojson }};
+</script>
+{% endblock %}

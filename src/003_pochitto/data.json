@@ -1,0 +1,198 @@
+{
+ "users": {
+  "wTJDzBJGaL": {
+   "id": "wTJDzBJGaL",
+   "name": "あやは",
+   "calendar": "google",
+   "created_at": "2026-10-24T17:44"
+  },
+  "kfYx9tcoFR": {
+   "id": "kfYx9tcoFR",
+   "name": "たなか",
+   "calendar": "google",
+   "created_at": "2026-10-24T17:44"
+  },
+  "kI2uD2NaFu": {
+   "id": "kI2uD2NaFu",
+   "name": "すずき",
+   "calendar": "google",
+   "created_at": "2026-10-24T17:44"
+  },
+  "wdUWjQwzYs": {
+   "id": "wdUWjQwzYs",
+   "name": "やまだ",
+   "calendar": "google",
+   "created_at": "2026-10-24T17:44"
+  },
+  "F901sSN1Nd": {
+   "id": "F901sSN1Nd",
+   "name": "さとう",
+   "calendar": "google",
+   "created_at": "2026-10-24T17:44"
+  },
+  "zT5lBz03bn": {
+   "id": "zT5lBz03bn",
+   "name": "こばやし",
+   "calendar": "google",
+   "created_at": "2026-10-24T17:44"
+  }
+ },
+ "events": {
+  "scCNwt": {
+   "id": "scCNwt",
+   "admin_token": "yDK5bsNA0hyybIeo",
+   "title": "ゼミの打ち上げ",
+   "sender_uid": "wTJDzBJGaL",
+   "sender_name": "あやは",
+   "priority": "high",
+   "deadline": "2026-10-25T20:44",
+   "memo": "場所は駅前。2〜3時間くらい",
+   "slots": [
+    {
+     "id": "6MJQ",
+     "date": "2026-10-31",
+     "start": "18:00",
+     "end": "21:00"
+    },
+    {
+     "id": "PCJv",
+     "date": "2026-11-01",
+     "start": "18:00",
+     "end": "21:00"
+    },
+    {
+     "id": "RvCV",
+     "date": "2026-11-07",
+     "start": "18:00",
+     "end": "21:00"
+    }
+   ],
+   "receivers": [
+    {
+     "id": "dwa6lU",
+     "name": "たなか",
+     "uid": "kfYx9tcoFR",
+     "answers": {
+      "6MJQ": "o",
+      "PCJv": "o",
+      "RvCV": "x"
+     },
+     "note": "",
+     "answered_at": "2026-10-24T17:45",
+     "promise": null
+    },
+    {
+     "id": "ZHsjqR",
+     "name": "すずき",
+     "uid": "kI2uD2NaFu",
+     "answers": {},
+     "note": "",
+     "answered_at": null,
+     "promise": {
+      "label": "明日の朝",
+      "due": "2026-10-25T09:00"
+     }
+    },
+    {
+     "id": "15OaK-",
+     "name": "やまだ",
+     "uid": "wdUWjQwzYs",
+     "answers": {},
+     "note": "",
+     "answered_at": null,
+     "promise": null
+    },
+    {
+     "id": "1ksCpi",
+     "name": "さとう",
+     "uid": "F901sSN1Nd",
+     "answers": {
+      "6MJQ": "t",
+      "PCJv": "o",
+      "RvCV": "x"
+     },
+     "note": "",
+     "answered_at": "2026-10-24T17:44",
+     "promise": null
+    },
+    {
+     "id": "-TkbIN",
+     "name": "こばやし",
+     "uid": "zT5lBz03bn",
+     "answers": {
+      "6MJQ": "x",
+      "PCJv": "o",
+      "RvCV": "o"
+     },
+     "note": "2日目は15分遅れるかも！",
+     "answered_at": "2026-10-24T17:44",
+     "promise": null
+    }
+   ],
+   "created_at": "2026-10-24T17:44"
+  },
+  "ptiziv": {
+   "id": "ptiziv",
+   "admin_token": "9YfGpbUa32JZZSca",
+   "title": "サークル合宿の下見",
+   "sender_uid": "kI2uD2NaFu",
+   "sender_name": "すずき",
+   "priority": "normal",
+   "deadline": "2026-10-28T17:44",
+   "memo": "",
+   "slots": [
+    {
+     "id": "OJlI",
+     "date": "2026-11-07",
+     "start": "18:00",
+     "end": "21:00"
+    },
+    {
+     "id": "M4uK",
+     "date": "2026-11-08",
+     "start": "18:00",
+     "end": "21:00"
+    },
+    {
+     "id": "kGyM",
+     "date": "2026-11-14",
+     "start": "18:00",
+     "end": "21:00"
+    }
+   ],
+   "receivers": [
+    {
+     "id": "nCs3JS",
+     "name": "あやは",
+     "uid": "wTJDzBJGaL",
+     "answers": {
+      "OJlI": "x",
+      "M4uK": "o",
+      "kGyM": "o"
+     },
+     "note": "",
+     "answered_at": "2026-10-24T17:46",
+     "promise": null
+    }
+   ],
+   "created_at": "2026-10-24T17:44"
+  }
+ },
+ "presents": {
+  "FyV6QV51": {
+   "id": "FyV6QV51",
+   "event_id": "scCNwt",
+   "receiver_id": "dwa6lU",
+   "from_name": "あやは",
+   "message": "はよ〜〜！",
+   "count": 39,
+   "opened": false,
+   "created_at": "2026-10-24T17:44"
+  }
+ },
+ "demo": {
+  "sender": "wTJDzBJGaL",
+  "receiver": "kfYx9tcoFR",
+  "event": "scCNwt"
+ }
+}

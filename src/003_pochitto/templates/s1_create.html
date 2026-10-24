@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}新しい日程調整{% endblock %}
+{% block back %}<a class="back" href="{{ url_for('home') }}">‹</a>{% endblock %}
+{% block content %}
+{% set f = form or {} %}
+<span class="star" style="top:70px;right:70px;transform:rotate(20deg)">★</span>
+<span class="star blue" style="top:94px;right:44px">★</span>
+<h1 class="display">なに決める？</h1>
+<p class="sub">候補を置いたら、あとはリンクを投げるだけ。</p>
+{% if errors %}<div class="errors">{% for e in errors %}<div>・{{ e }}</div>{% endfor %}</div>{% endif %}
+
+<form method="post" id="create-form">
+  <label class="label" for="title">イベント名</label>
+  <input class="input" id="title" name="title" maxlength="40" placeholder="ゼミの打ち上げ" value="{{ f.title }}" required>
+
+  <span class="label">優先度</span>
+  <div class="chips">
+    {% for key, p in PRIORITY.items() %}
+    <label class="chip-radio"><input type="radio" name="priority" value="{{ key }}"
+      {% if (f.priority or 'normal') == key %}checked{% endif %}><span>{{ p.label }}</span></label>
+    {% endfor %}
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:end">
+    <span class="label">候補日時</span>
+    <span class="chip chip-soft" id="slot-count">{{ slots|length }}件</span>
+  </div>
+  <div id="slots">
+    {% for s in slots %}
+    <div class="slot-row">
+      <input type="date" name="slot_date" value="{{ s.date }}" required aria-label="日付">
+      <input type="time" name="slot_start" value="{{ s.start }}" step="900" required aria-label="開始">
+      <span>–</span>
+      <input type="time" name="slot_end" value="{{ s.end }}" step="900" required aria-label="終了">
+      <button type="button" class="rm" aria-label="削除">×</button>
+    </div>
+    {% endfor %}
+  </div>
+  <button type="button" class="btn btn-dashed" id="add-slot">＋ 候補を追加</button>
+
+  <label class="label" for="deadline">回答の締切</label>
+  <input class="input" type="datetime-local" id="deadline" name="deadline" value="{{ default_deadline }}" required>
+
+  <label class="label" for="members">誰に聞く？（カンマ区切り・任意）</label>
+  <input class="input" id="members" name="members" placeholder="たなか, すずき, やまだ" value="{{ f.members }}">
+  <p class="small muted" style="margin:6px 2px 0">入れておくと「まだの人」が分かるよ。リンクを開いた人が自分で追加もできる。</p>
+
+  <label class="label" for="memo">ひとこと（任意・AIが要約して相手に見せる）</label>
+  <textarea class="input" id="memo" name="memo" maxlength="200" placeholder="場所は駅前。2〜3時間くらい">{{ f.memo }}</textarea>
+
+  <div class="sticky-bottom"><button class="btn btn-main">リンクをつくる</button></div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const box = document.getElementById("slots");
+const count = () => document.getElementById("slot-count").textContent = box.children.length + "件";
+document.getElementById("add-slot").onclick = () => {
+  const last = box.lastElementChild;
+  const row = last.cloneNode(true);
+  // 最後の候補の翌日を初期値にする
+  const d = new Date(last.querySelector("[name=slot_date]").value || Date.now());
+  d.setDate(d.getDate() + 1);
+  row.querySelector("[name=slot_date]").value = d.toISOString().slice(0, 10);
+  box.appendChild(row); count();
+};
+box.addEventListener("click", e => {
+  if (!e.target.classList.contains("rm")) return;
+  if (box.children.length === 1) return Pochi.toast("候補は1つは必要だよ");
+  e.target.closest(".slot-row").remove(); count();
+});
+</script>
+{% endblock %}

@@ -1,3 +1,5 @@
+#python -m streamlit run C:\Users\izmr3\github\tkb_2626\src\002_S1~S4.py
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
