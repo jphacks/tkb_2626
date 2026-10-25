@@ -3,10 +3,11 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/Button";
-import { lessMotion, pop, shake, tap } from "@/lib/fx";
+import { buzz, lessMotion, playRandomSample, pop, preloadSamples, shake, tap } from "@/lib/fx";
 import { sendNudges } from "./actions";
 
 const LIMIT = 10; // 秒
+const MASH_SOUNDS = ["/sfx/mash-1.m4a", "/sfx/mash-2.m4a"]; // 押すたびどちらかをランダムに鳴らす
 const GAUGE = 100; // ゲージが満タンになる回数
 const MAX_PILE = 140; // 積もる「はよ〜〜！」の上限（見た目だけ）
 const STICKER_TONES = ["bg-sunken text-ink shadow-soft", "bg-accent text-ink", "bg-brand-soft text-brand"];
@@ -54,6 +55,8 @@ export function MashPad({ eventId, to }: { eventId: string; to: string }) {
     [],
   );
 
+  useEffect(() => preloadSamples(MASH_SOUNDS), []);
+
   // 残り時間を進める（最初の1回目から数える）
   useEffect(() => {
     if (count === 0 || done) return;
@@ -83,7 +86,8 @@ export function MashPad({ eventId, to }: { eventId: string; to: string }) {
     if (count === 0) startedAt.current = performance.now();
     const n = count + 1;
     setCount(n);
-    tap(n % 10 === 0);
+    buzz(n % 10 === 0);
+    void playRandomSample(MASH_SOUNDS).then((ok) => ok || tap(n % 10 === 0));
     pop(btnRef.current, 0.9, 120);
     if (!lessMotion()) {
       burstRef.current?.animate([{ transform: "scale(.8)", opacity: 0.4 }, { transform: "scale(1.15)", opacity: 1 }, { transform: "scale(1)", opacity: 1 }], { duration: 180 });

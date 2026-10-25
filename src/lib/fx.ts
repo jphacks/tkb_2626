@@ -148,3 +148,57 @@ export function shake(el: Element, amp: number, ms: number) {
 export function pop(el: Element | null, from = 0.85, ms = 200) {
   el?.animate([{ transform: `scale(${from})` }, { transform: "scale(1.08)" }, { transform: "scale(1)" }], { duration: ms });
 }
+
+// 振動だけ（音は別に鳴らすとき）
+export function buzz(strong = false) {
+  vibrate(strong ? 18 : 7);
+}
+
+// 録音した効果音。前後の無音を切り、音量をそろえて鳴らす（連打で重なっても鳴るよう Web Audio で再生）
+type Sample = { buffer: AudioBuffer; start: number; end: number; gain: number };
+const samples = new Map<string, Promise<Sample | null>>();
+
+function loadSample(url: string) {
+  let p = samples.get(url);
+  if (!p) {
+    p = (async () => {
+      const c = audio();
+      if (!c) return null;
+      try {
+        const buffer = await c.decodeAudioData(await (await fetch(url)).arrayBuffer());
+        const ch = buffer.getChannelData(0);
+        let peak = 0;
+        for (let i = 0; i < ch.length; i++) peak = Math.max(peak, Math.abs(ch[i]));
+        const th = peak * 0.1;
+        let first = 0;
+        while (first < ch.length && Math.abs(ch[first]) < th) first++;
+        let last = ch.length - 1;
+        while (last > first && Math.abs(ch[last]) < th) last--;
+        const sr = buffer.sampleRate;
+        return { buffer, start: Math.max(0, first / sr - 0.01), end: Math.min(buffer.duration, last / sr + 0.05), gain: peak > 0 ? 0.8 / peak : 1 };
+      } catch {
+        return null;
+      }
+    })();
+    samples.set(url, p);
+  }
+  return p;
+}
+
+export function preloadSamples(urls: string[]) {
+  urls.forEach((u) => void loadSample(u));
+}
+
+// urls のどれか1つをランダムに鳴らす。読み込めていなければ false（呼び出し側でカチッに切り替える）
+export async function playRandomSample(urls: string[]) {
+  const c = audio();
+  const s = c && (await loadSample(urls[Math.floor(Math.random() * urls.length)]));
+  if (!c || !s) return false;
+  const src = c.createBufferSource();
+  const g = c.createGain();
+  src.buffer = s.buffer;
+  g.gain.value = s.gain;
+  src.connect(g).connect(c.destination);
+  src.start(0, s.start, s.end - s.start);
+  return true;
+}
