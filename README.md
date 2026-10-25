@@ -1,4 +1,3 @@
-<img width="240" height="360" alt="2026年10月25日連打" src="https://github.com/user-attachments/assets/3587c999-a687-4db7-b7ef-9ec10a270aba" />
 # ぽちぷりーず 
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/e5f8434b-93f7-4643-9f78-0af98bb143b4" />
 
