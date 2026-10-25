@@ -1,9 +1,10 @@
 # ぽちぷりーず
 
-<img width="1891" height="683" alt="image" src="https://github.com/user-attachments/assets/1e03aa2c-71b1-4322-a549-8be9d7e2a0a5" />　<img width="639" height="1184" alt="image" src="https://github.com/user-attachments/assets/ccc8c604-9b04-4762-8aae-e8bcf4202b7d" />
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/1e03aa2c-71b1-4322-a549-8be9d7e2a0a5" />　
 
 
 ## 製品概要
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/ccc8c604-9b04-4762-8aae-e8bcf4202b7d" />
 ### 背景(製品開発のきっかけ、課題等）
 #### 問題
 **幹事側**
