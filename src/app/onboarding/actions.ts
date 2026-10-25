@@ -5,13 +5,9 @@ import { redirect } from "next/navigation";
 import { CONNECT_COOKIE, signIn } from "@/auth";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { safePath } from "@/lib/safe-path";
 
 type CalendarSignIn = "google" | "microsoft-entra-id";
-
-function safePath(value: FormDataEntryValue | null) {
-  const url = typeof value === "string" ? value : "";
-  return url.startsWith("/") && !url.startsWith("//") ? url : "/home";
-}
 
 // C3 で名前を聞いているときは先に保存する
 async function saveName(userId: string, formData: FormData) {

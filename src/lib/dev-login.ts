@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { randomToken } from "@/lib/token";
+import { safePath } from "@/lib/safe-path";
 
 export const isDevLoginEnabled = async () => process.env.DEV_LOGIN === "1" && process.env.NODE_ENV !== "production";
 
@@ -27,5 +28,5 @@ export async function devLogin(formData: FormData) {
   await prisma.session.create({ data: { sessionToken, userId: user.id, expires } });
 
   (await cookies()).set("authjs.session-token", sessionToken, { httpOnly: true, sameSite: "lax", path: "/", expires });
-  redirect(callbackUrl.startsWith("/") && !callbackUrl.startsWith("//") ? callbackUrl : "/home");
+  redirect(safePath(callbackUrl));
 }

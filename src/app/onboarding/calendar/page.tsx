@@ -5,10 +5,10 @@ import { TopBar } from "@/components/TopBar";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { connectCalendar, skipCalendar } from "../actions";
+import { safePath } from "@/lib/safe-path";
 
 function safeCallbackUrl(value: string | string[] | undefined) {
-  const url = typeof value === "string" ? value : undefined;
-  return url && url.startsWith("/") && !url.startsWith("//") ? url : "/home";
+  return safePath(value);
 }
 
 // C3: 初回だけ。Google でログインした人は events.signIn で onboardedAt が立っているので素通りする

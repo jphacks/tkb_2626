@@ -6,11 +6,11 @@ import { prisma } from "@/lib/db";
 import { Button } from "@/components/Button";
 import { devLogin, isDevLoginEnabled } from "@/lib/dev-login";
 import { AUTH_ERROR_MESSAGE } from "@/lib/auth-error";
+import { safePath } from "@/lib/safe-path";
 
 // 外部サイトへ飛ばされないよう、アプリ内のパスだけ受け付ける
 function safeCallbackUrl(value: string | string[] | undefined) {
-  const url = typeof value === "string" ? value : undefined;
-  return url && url.startsWith("/") && !url.startsWith("//") ? url : "/home";
+  return safePath(value);
 }
 
 async function findInvite(callbackUrl: string) {
