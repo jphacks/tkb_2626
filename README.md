@@ -35,7 +35,7 @@
 #### 3. 特長3 連打
 返事がない人に「はよ〜〜！」を連打して、プレゼントとして送れます。相手が開くと、画面いっぱいに「はよ〜〜！」が降ってきます。
 
-<img width="240" height="360" alt="2026年10月25日連打" src="https://github.com/user-attachments/assets/a4f8cda7-c32d-408d-8793-de6757d3a855" />
+<img width="200"  alt="2026年10月25日連打" src="https://github.com/user-attachments/assets/a4f8cda7-c32d-408d-8793-de6757d3a855" />
 
 
 
