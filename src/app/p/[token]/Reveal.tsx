@@ -44,7 +44,12 @@ export function Reveal({ fromName, count, message, answerHref, reduceEffects }: 
 
   // 390×844 の絵を、画面の高さ・幅に収まるよう縮める（低いスマホでも下が切れないように）
   useEffect(() => {
-    const fit = () => setScale(Math.min(1, window.innerWidth / 390, window.innerHeight / 844));
+    // 見えている範囲（スマホのブラウザのツールバーを除く）に合わせる
+    const fit = () => {
+      const w = Math.min(window.innerWidth, 430);
+      const h = window.visualViewport?.height ?? window.innerHeight;
+      setScale(Math.min(1, w / 390, h / 844));
+    };
     fit();
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
@@ -71,7 +76,7 @@ export function Reveal({ fromName, count, message, answerHref, reduceEffects }: 
   }, [stage, count, reduceEffects]);
 
   return (
-    <main ref={rootRef} className="fixed inset-0 z-50 mx-auto max-w-[430px] overflow-hidden" onClick={() => stage < 2 && setStage((s) => s + 1)}>
+    <main ref={rootRef} className="fixed inset-x-0 top-0 z-50 mx-auto h-dvh max-w-[430px] overflow-hidden" onClick={() => stage < 2 && setStage((s) => s + 1)}>
       <div className="absolute top-1/2 left-1/2 h-[844px] w-[390px]" style={{ transform: `translate(-50%,-50%) scale(${scale})` }}>
         {stage === 0 && <Burst fromName={fromName} count={count} reduceEffects={reduceEffects} />}
         {stage === 1 && <Don reduceEffects={reduceEffects} />}
@@ -80,7 +85,7 @@ export function Reveal({ fromName, count, message, answerHref, reduceEffects }: 
       {stage === 1 && !reduceEffects && <div className="pointer-events-none absolute inset-0 bg-accent opacity-0 animate-[flash_1s_linear_1]" />}
       {/* 返事するボタンは絵の外に置き、いつも画面の下に見えるようにする */}
       {stage === 2 && (
-        <div className="absolute inset-x-6 bottom-[max(24px,env(safe-area-inset-bottom))] z-10 animate-[pop-in_300ms_ease-out_600ms_backwards]">
+        <div className="absolute inset-x-6 bottom-[max(20px,env(safe-area-inset-bottom))] z-10 animate-[pop-in_300ms_ease-out_600ms_backwards]">
           <Link href={answerHref} className={buttonClassName("primary")}>
             返事する
           </Link>

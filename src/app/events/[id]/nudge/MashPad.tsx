@@ -157,6 +157,7 @@ export function MashPad({ eventId, to, message }: { eventId: string; to: string;
           <button
             ref={btnRef}
             type="button"
+            data-no-pop
             onClick={mash}
             className={`absolute top-[45px] left-[47px] flex size-[155px] flex-col items-center justify-center rounded-pill bg-accent shadow-[0_3.7px_0_#183238] ${done ? "grayscale-[.7]" : ""}`}
           >

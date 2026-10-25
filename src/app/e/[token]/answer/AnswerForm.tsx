@@ -140,6 +140,7 @@ export function AnswerForm(props: {
                   <button
                     key={m}
                     type="button"
+                    data-no-pop
                     onClick={(e) => {
                       pick(c.id, m);
                       tap();
