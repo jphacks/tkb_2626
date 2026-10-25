@@ -1,10 +1,7 @@
-# ぽちぷりーず
-
-<img width="200" alt="image" src="https://github.com/user-attachments/assets/1e03aa2c-71b1-4322-a549-8be9d7e2a0a5" />　
-
+# ぽちぷりーず 
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/e5f8434b-93f7-4643-9f78-0af98bb143b4" />
 
 ## 製品概要
-<img width="200" alt="image" src="https://github.com/user-attachments/assets/ccc8c604-9b04-4762-8aae-e8bcf4202b7d" />
 ### 背景(製品開発のきっかけ、課題等）
 #### 問題
 **幹事側**
@@ -27,14 +24,20 @@
 ### 特長
 #### 1. 特長1　○△×が自動で入る
 カレンダーの予定をもとに、○△×を自動で入れます。理由も表示されるので、違うところだけ直せばOKです。予定の中身は相手に見えません。
-返す時間を宣言できる
+
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/344a2cc4-05ac-4d34-9d63-fd00fcad884d" />
 
 #### 2. 特長2 回答期限
 「今夜21時に返す」のように、返す時間だけ先に伝えられます。幹事には宣言が届き、本人には時間の前にリマインドが届きます。
-連打で催促できる
+
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/168db0b6-3363-4d39-9a2b-12f1d301bd66" />
 
 #### 3. 特長3 連打
 返事がない人に「はよ〜〜！」を連打して、プレゼントとして送れます。相手が開くと、画面いっぱいに「はよ〜〜！」が降ってきます。
+
+<img width="240" height="360" alt="2026年10月25日連打" src="https://github.com/user-attachments/assets/a4f8cda7-c32d-408d-8793-de6757d3a855" />
+
+
 
 ### 解決出来ること
 * 返事待ちで日程が決まらない状態を減らせます。
@@ -48,18 +51,22 @@
 ## 開発技術
 ### 活用した技術
 #### API・データ
-* LINE Login、LINE Messaging API
 * Google Calendar API
   
 #### フレームワーク・ライブラリ・モジュール
 * Next.js（React）
 * TypeScript
 * Tailwind CSS
-* Framer Motion 
+* Framer Motion
 
-#### デバイス
+### デバイス
+
+* スマートフォン
+* PC
 
 ### 独自技術
 #### ハッカソンで開発した独自機能・技術
-* 独自で開発したものの内容をこちらに記載してください
-* 特に力を入れた部分をファイルリンク、またはcommit_idを記載してください。
+
+* ○△×の自動入力：候補日の前後の予定や移動時間も見て判定し、理由と一緒に表示します。
+* 返す時間の宣言：宣言を幹事に通知し、宣言した時間の10分前に本人へリマインドします。
+* 連打プレゼント：連打した回数をリンクにして送り、開いたときに回数に合わせた演出を出します。
