@@ -3,9 +3,6 @@
 
 
 ## 製品概要
-
-<img width="200" alt="image" src="https://github.com/user-attachments/assets/ccc8c604-9b04-4762-8aae-e8bcf4202b7d" />
-
 ### 背景(製品開発のきっかけ、課題等）
 #### 問題
 **幹事側**
@@ -36,6 +33,10 @@
 
 #### 3. 特長3 連打
 返事がない人に「はよ〜〜！」を連打して、プレゼントとして送れます。相手が開くと、画面いっぱいに「はよ〜〜！」が降ってきます。
+
+
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/ccc8c604-9b04-4762-8aae-e8bcf4202b7d" /><img width="200" alt="image" src="https://github.com/user-attachments/assets/344a2cc4-05ac-4d34-9d63-fd00fcad884d" />
+
 
 ### 解決出来ること
 * 返事待ちで日程が決まらない状態を減らせます。
