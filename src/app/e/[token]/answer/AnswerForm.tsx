@@ -39,12 +39,18 @@ export function AnswerForm(props: {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [sidebarFor, setSidebarFor] = useState<string | null>(null);
+  // 「いま返す」か、返す時間の宣言か。選ぶだけで、送るのは下の「これで送る」
+  const [reply, setReply] = useState<(typeof REPLY_LABELS)[number] | null>(null);
+  // ○△×を自分で選んだら、宣言はできなくする（その回答を送る）
+  const [touched, setTouched] = useState(false);
 
   const hasAi = props.candidates.some((c) => c.byAi);
   const allAnswered = [...values.values()].every((v) => v.value);
 
   function pick(id: string, value: Mark) {
     setValues((prev) => new Map(prev).set(id, { value, byAi: false }));
+    setTouched(true);
+    setReply(null);
   }
 
   function run(fn: () => Promise<void>) {
@@ -59,6 +65,7 @@ export function AnswerForm(props: {
   }
 
   function submit() {
+    if (reply) return run(() => declareReply(token, reply));
     run(() =>
       submitAnswers(token, {
         answers: [...values.entries()].map(([candidateId, v]) => ({ candidateId, value: v.value!, byAi: v.byAi })),
@@ -178,21 +185,28 @@ export function AnswerForm(props: {
             </button>
           </div>
         ) : (
-          <div className="flex w-full flex-col gap-2 rounded-md bg-accent-soft p-3">
+          <div className={`flex w-full flex-col gap-2 rounded-md bg-accent-soft p-3 transition-opacity ${touched ? "opacity-40" : ""}`}>
             <p className="text-[13px] leading-[1.4] font-bold tracking-[0.26px]">候補を見ても決めきれない？ 返す時間だけ宣言しよう</p>
+            {touched && <p className="text-xs leading-[1.5] font-medium text-ink-sub">○△×を選んだので、このまま回答を送ってね</p>}
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-pill bg-brand px-3 py-1.5 text-[13px] leading-[1.4] font-bold tracking-[0.26px] text-white">いま返す</span>
-              {REPLY_LABELS.map((label) => (
-                <button
-                  key={label}
-                  type="button"
-                  disabled={pending}
-                  onClick={() => run(() => declareReply(token, label))}
-                  className="rounded-pill bg-sunken px-3 py-1.5 text-[13px] leading-[1.4] font-bold tracking-[0.26px] shadow-soft"
-                >
-                  {label}
-                </button>
-              ))}
+              {[null, ...REPLY_LABELS].map((label) => {
+                const on = reply === label;
+                return (
+                  <button
+                    key={label ?? "now"}
+                    type="button"
+                    disabled={pending || touched}
+                    aria-pressed={on}
+                    onClick={() => {
+                      tap();
+                      setReply(label);
+                    }}
+                    className={`rounded-pill px-3 py-1.5 text-[13px] leading-[1.4] font-bold tracking-[0.26px] ${on ? "bg-brand text-white" : "bg-sunken shadow-soft"}`}
+                  >
+                    {label ?? "いま返す"}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -211,8 +225,8 @@ export function AnswerForm(props: {
 
       <div className="flex flex-col gap-2 px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">
         {error && <p className="text-center text-xs font-medium text-ink-sub">{error}</p>}
-        <Button type="button" variant="primary" disabled={!allAnswered || pending} onClick={submit}>
-          {pending ? "送っています…" : "これで送る"}
+        <Button type="button" variant="primary" disabled={(!reply && !allAnswered) || pending} onClick={submit}>
+          {pending ? "送っています…" : reply ? `「${reply}に返す」で送る` : "これで送る"}
         </Button>
       </div>
     </>

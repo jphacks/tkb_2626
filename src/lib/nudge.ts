@@ -15,5 +15,12 @@ export async function nudgeTargets(eventId: string, ownerId: string, to: string)
   });
   // 一人ずつ送るときは、宣言中の人は「待つ」なので対象外
   const targets = to === "all" ? waiting : waiting.filter((p) => p.userId === to && participantStatus(p) === "PENDING");
-  return { event, open, targets: targets.map((p) => p.user) };
+  return {
+    event,
+    open,
+    targets: targets.map((p) => ({
+      ...p.user,
+      label: participantStatus(p) === "DECLARED" ? `${p.replyByLabel}に返すと宣言中` : "まだ返していない",
+    })),
+  };
 }

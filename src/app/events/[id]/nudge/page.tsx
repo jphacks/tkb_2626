@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
 import { nudgeTargets } from "@/lib/nudge";
 import { requireUser } from "@/lib/session";
-import { MashPad } from "./MashPad";
+import { NudgeFlow } from "./NudgeFlow";
 
 export default async function NudgePage(props: PageProps<"/events/[id]/nudge">) {
   const { id } = await props.params;
@@ -18,7 +18,7 @@ export default async function NudgePage(props: PageProps<"/events/[id]/nudge">) 
   return (
     <main className="flex flex-1 flex-col pt-11">
       <TopBar title={title} backHref={`/events/${id}`} />
-      <MashPad eventId={id} to={target} />
+      <NudgeFlow eventId={id} to={target} targets={result.targets} />
     </main>
   );
 }

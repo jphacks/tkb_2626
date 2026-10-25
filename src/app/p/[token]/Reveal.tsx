@@ -40,6 +40,15 @@ const popIn = (delay: number, ms = 400) => ({
 export function Reveal({ fromName, count, message, answerHref, reduceEffects }: Props) {
   const [stage, setStage] = useState(0);
   const rootRef = useRef<HTMLElement>(null);
+  const [scale, setScale] = useState(1);
+
+  // 390×844 の絵を、画面の高さ・幅に収まるよう縮める（低いスマホでも下が切れないように）
+  useEffect(() => {
+    const fit = () => setScale(Math.min(1, window.innerWidth / 390, window.innerHeight / 844));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
 
   useEffect(() => {
     if (stage === 0) {
@@ -63,12 +72,20 @@ export function Reveal({ fromName, count, message, answerHref, reduceEffects }: 
 
   return (
     <main ref={rootRef} className="fixed inset-0 z-50 mx-auto max-w-[430px] overflow-hidden" onClick={() => stage < 2 && setStage((s) => s + 1)}>
-      <div className="absolute top-1/2 left-1/2 h-[844px] w-[390px] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-1/2 left-1/2 h-[844px] w-[390px]" style={{ transform: `translate(-50%,-50%) scale(${scale})` }}>
         {stage === 0 && <Burst fromName={fromName} count={count} reduceEffects={reduceEffects} />}
         {stage === 1 && <Don reduceEffects={reduceEffects} />}
-        {stage === 2 && <Calm fromName={fromName} count={count} message={message} answerHref={answerHref} reduceEffects={reduceEffects} />}
+        {stage === 2 && <Calm fromName={fromName} count={count} message={message} reduceEffects={reduceEffects} />}
       </div>
       {stage === 1 && !reduceEffects && <div className="pointer-events-none absolute inset-0 bg-accent opacity-0 animate-[flash_1s_linear_1]" />}
+      {/* 返事するボタンは絵の外に置き、いつも画面の下に見えるようにする */}
+      {stage === 2 && (
+        <div className="absolute inset-x-6 bottom-[max(24px,env(safe-area-inset-bottom))] z-10 animate-[pop-in_300ms_ease-out_600ms_backwards]">
+          <Link href={answerHref} className={buttonClassName("primary")}>
+            返事する
+          </Link>
+        </div>
+      )}
     </main>
   );
 }
@@ -165,7 +182,7 @@ function Don({ reduceEffects }: { reduceEffects: boolean }) {
   );
 }
 
-function Calm({ fromName, count, message, answerHref, reduceEffects }: { fromName: string; count: number; message: string | null; answerHref: string; reduceEffects: boolean }) {
+function Calm({ fromName, count, message, reduceEffects }: { fromName: string; count: number; message: string | null; reduceEffects: boolean }) {
   const [shown, setShown] = useState(0);
 
   // 連打数を0から数え上げる
@@ -238,11 +255,6 @@ function Calm({ fromName, count, message, answerHref, reduceEffects }: { fromNam
         {shown}
       </p>
       <p className="absolute top-[640px] w-full text-center text-[22px] font-bold text-white [text-shadow:0_0_17px_#f4e01c,0_0_7px_rgba(255,255,255,0.9)]">連打かかりました</p>
-      <div className="absolute inset-x-6 bottom-[max(34px,env(safe-area-inset-bottom))]">
-        <Link href={answerHref} className={buttonClassName("primary")}>
-          返事する
-        </Link>
-      </div>
     </div>
   );
 }

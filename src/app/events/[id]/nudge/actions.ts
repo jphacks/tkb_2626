@@ -8,7 +8,7 @@ import { nudgeTargets } from "@/lib/nudge";
 import { randomToken } from "@/lib/token";
 
 // S4「〜をプレゼントで送る」: 相手ごとに Nudge を作って P1 へ
-export async function sendNudges(eventId: string, to: string, count: number) {
+export async function sendNudges(eventId: string, to: string, count: number, message: string) {
   const user = await requireUser(`/events/${eventId}`);
   const n = z.number().int().min(1).max(999).parse(count);
   const result = await nudgeTargets(eventId, user.id, to);
@@ -16,7 +16,7 @@ export async function sendNudges(eventId: string, to: string, count: number) {
 
   const created = await prisma.$transaction(
     result.targets.map((t) =>
-      prisma.nudge.create({ data: { eventId, fromUserId: user.id, toUserId: t.id, count: n, token: randomToken(10) }, select: { id: true } }),
+      prisma.nudge.create({ data: { eventId, fromUserId: user.id, toUserId: t.id, count: n, message: message.trim().slice(0, 100) || null, token: randomToken(10) }, select: { id: true } }),
     ),
   );
   redirect(`/events/${eventId}/nudge/sent?ids=${created.map((c) => c.id).join(",")}`);

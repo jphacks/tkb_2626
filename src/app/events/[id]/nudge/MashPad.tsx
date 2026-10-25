@@ -26,7 +26,7 @@ const rand = (i: number, salt: number) => {
 type Ono = { id: number; kind: number; x: number; y: number; r: number; s: number };
 
 // S4: 10秒のあいだ連打する。押すたびに「はよ〜〜！」が落ちてきて積もり、擬音が飛ぶ
-export function MashPad({ eventId, to }: { eventId: string; to: string }) {
+export function MashPad({ eventId, to, message }: { eventId: string; to: string; message: string }) {
   const [count, setCount] = useState(0);
   const [left, setLeft] = useState(LIMIT);
   const [done, setDone] = useState(false);
@@ -108,7 +108,7 @@ export function MashPad({ eventId, to }: { eventId: string; to: string }) {
       tap(true);
       return;
     }
-    startTransition(() => sendNudges(eventId, to, count));
+    startTransition(() => sendNudges(eventId, to, count, message));
   }
 
   const urgent = count > 0 && left <= 3 && !done;
