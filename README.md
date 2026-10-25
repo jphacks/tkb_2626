@@ -1,6 +1,5 @@
 # ぽちぷりーず 
-<img width="200" alt="image" src="https://github.com/user-attachments/assets/1e03aa2c-71b1-4322-a549-8be9d7e2a0a5" />　
-
+<img width="700" alt="image" src="https://github.com/user-attachments/assets/e5f8434b-93f7-4643-9f78-0af98bb143b4" />
 
 ## 製品概要
 ### 背景(製品開発のきっかけ、課題等）
