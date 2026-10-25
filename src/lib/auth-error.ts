@@ -3,5 +3,6 @@ export const AUTH_ERROR_MESSAGE: Record<string, string> = {
   OAuthAccountNotLinked: "そのアカウントは、もう別のユーザーで使われています。",
   AccessDenied: "つなげませんでした。もう一度ためしてね。",
   Verification: "ログインリンクの期限が切れているか、もう使われています。もう一度送ってね。",
+  LineComingSoon: "LINEでのログインはただいま準備中です。Googleで続けてね。",
   Default: "うまくいきませんでした。もう一度ためしてね。",
 };

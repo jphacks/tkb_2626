@@ -31,7 +31,8 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
   const invite = await findInvite(callbackUrl);
   const showDevLogin = await isDevLoginEnabled();
-  const showLine = Boolean(process.env.AUTH_LINE_ID);
+  // LINE の設定値が無い環境でも、ボタンは出しておく（押すと「準備中」を出す）
+  const lineReady = Boolean(process.env.AUTH_LINE_ID);
   const showGoogle = Boolean(process.env.AUTH_GOOGLE_ID);
   const showEmail = Boolean(process.env.EMAIL_SERVER_USER);
   const error = typeof searchParams.error === "string" ? (AUTH_ERROR_MESSAGE[searchParams.error] ?? AUTH_ERROR_MESSAGE.Default) : null;
@@ -41,6 +42,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
   async function signInWithLine() {
     "use server";
+    if (!lineReady) redirect(`/login?error=LineComingSoon&callbackUrl=${encodeURIComponent(callbackUrl)}`);
     await signIn("line", { redirectTo });
   }
 
@@ -81,13 +83,11 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
         <div className="h-2" />
 
-        {showLine && (
-          <form action={signInWithLine} className="w-full">
-            <Button type="submit" variant="accent">
-              LINEで続ける
-            </Button>
-          </form>
-        )}
+        <form action={signInWithLine} className="w-full">
+          <Button type="submit" variant="accent">
+            LINEで続ける
+          </Button>
+        </form>
 
         {showGoogle && (
           <form action={signInWithGoogle} className="w-full">
