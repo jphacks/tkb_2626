@@ -1,8 +1,10 @@
 # ぽちぷりーず
 
-[![IMAGE ALT TEXT HERE](https://jphacks.com/wp-content/uploads/2026/07/IMG_5316.png)](https://www.youtube.com/watch?v=piaNsc6ilBI)
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/1e03aa2c-71b1-4322-a549-8be9d7e2a0a5" />　
+
 
 ## 製品概要
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/ccc8c604-9b04-4762-8aae-e8bcf4202b7d" />
 ### 背景(製品開発のきっかけ、課題等）
 #### 問題
 **幹事側**
@@ -30,6 +32,7 @@
 #### 2. 特長2 回答期限
 「今夜21時に返す」のように、返す時間だけ先に伝えられます。幹事には宣言が届き、本人には時間の前にリマインドが届きます。
 連打で催促できる
+
 #### 3. 特長3 連打
 返事がない人に「はよ〜〜！」を連打して、プレゼントとして送れます。相手が開くと、画面いっぱいに「はよ〜〜！」が降ってきます。
 
