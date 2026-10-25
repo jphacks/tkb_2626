@@ -29,7 +29,6 @@ export default async function NudgeSentPage(props: PageProps<"/events/[id]/nudge
         eventId={id}
         count={nudges[0].count}
         message={nudges[0].message ?? ""}
-        senderName={user.name ?? "あなた"}
         gifts={nudges.map((n) => ({ id: n.id, toName: n.to.name ?? "相手", url: `${proto}://${host}/p/${n.token}` }))}
       />
     </main>

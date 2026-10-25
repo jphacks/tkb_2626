@@ -8,7 +8,7 @@ import { MatomeButton } from "./MatomeButton";
 import { TopBar } from "@/components/TopBar";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { lineShareUrl } from "@/lib/share";
+import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ManageMenu } from "./ManageMenu";
 import { initial, participantStatus, rankTallies, remainingRatio, STATUS_LABEL, tally, type ParticipantStatus } from "@/lib/status";
 import { formatDateTime, formatDay, toJstParts } from "@/lib/time";
@@ -78,15 +78,8 @@ export default async function EventStatusPage(props: PageProps<"/events/[id]">) 
       <div className="flex flex-1 flex-col gap-4 px-6 pt-2 pb-6">
         {saved === "1" && (
           <div className="flex w-full items-center gap-3 rounded-md bg-brand-soft p-3">
-            <p className="flex-1 text-[13px] leading-[1.4] font-bold">変更を保存したよ。みんなにも知らせよう</p>
-            <a
-              href={lineShareUrl(`【${event.title}】の内容を変えたよ（締切 ${formatDateTime(event.deadlineAt)}）`, `${proto}://${host}/e/${event.shareToken}`)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 rounded-pill bg-accent px-3 py-2 text-[13px] font-bold drop-shadow-pop"
-            >
-              LINEで知らせる
-            </a>
+            <p className="flex-1 text-[13px] leading-[1.4] font-bold">変更を保存したよ。リンクを送って、みんなにも知らせよう</p>
+            <CopyLinkButton small url={`${proto}://${host}/e/${event.shareToken}`} />
           </div>
         )}
         {/* 締切のカウントダウン */}

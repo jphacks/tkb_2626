@@ -3,32 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { buttonClassName } from "@/components/Button";
-import { lineShareUrl } from "@/lib/share";
+import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { setNudgeMessage } from "../actions";
-import { tap } from "@/lib/fx";
 
 type Gift = { id: string; toName: string; url: string };
 
-// P1: プレゼントできた（送る前）。ひとことを添えて、相手ごとに LINE で渡す
-export function GiftShare({ eventId, count, message: initial, senderName, gifts }: { eventId: string; count: number; message: string; senderName: string; gifts: Gift[] }) {
+// P1: プレゼントできた（送る前）。ひとことを添えて、相手ごとのリンクをコピーして渡す
+export function GiftShare({ eventId, count, message: initial, gifts }: { eventId: string; count: number; message: string; gifts: Gift[] }) {
   const [message, setMessage] = useState(initial || "はよ〜〜！");
-  const [copied, setCopied] = useState<string | null>(null);
   const ids = gifts.map((g) => g.id);
   const save = () => setNudgeMessage(eventId, ids, message);
-
-  async function share(g: Gift) {
-    await save();
-    window.location.assign(lineShareUrl(`${senderName}からプレゼントが届いたよ！`, g.url));
-  }
-
-  async function copy(g: Gift) {
-    tap();
-    await save();
-    await navigator.clipboard.writeText(g.url);
-    setCopied(g.id);
-    setTimeout(() => setCopied(null), 2000);
-  }
 
   return (
     <>
@@ -62,14 +46,7 @@ export function GiftShare({ eventId, count, message: initial, senderName, gifts 
 
       <div className="flex flex-col gap-2 px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">
         {gifts.map((g) => (
-          <div key={g.id} className="flex gap-2">
-            <button type="button" onClick={() => share(g)} className={buttonClassName("accent", "flex-1")}>
-              LINEで{g.toName}さんに渡す
-            </button>
-            <button type="button" onClick={() => copy(g)} className={buttonClassName("secondary", "!w-auto shrink-0 !px-4")}>
-              {copied === g.id ? "コピーした" : "コピー"}
-            </button>
-          </div>
+          <CopyLinkButton key={g.id} url={g.url} label={`${g.toName}さんに渡すリンクをコピー`} before={save} />
         ))}
         <Link href={`/events/${eventId}`} className="py-2 text-center text-[15px] leading-[1.6] font-bold text-brand">
           回答状況に戻る

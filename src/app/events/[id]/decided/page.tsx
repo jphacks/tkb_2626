@@ -8,7 +8,7 @@ import { googleCalendarUrl } from "@/lib/calendar-link";
 import { prisma } from "@/lib/db";
 import { attendeesOf, GENRE_ICON } from "@/lib/decided";
 import { requireUser } from "@/lib/session";
-import { lineShareUrl } from "@/lib/share";
+import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { formatDateTime } from "@/lib/time";
 
 export default async function DecidedPage(props: PageProps<"/events/[id]/decided">) {
@@ -27,7 +27,6 @@ export default async function DecidedPage(props: PageProps<"/events/[id]/decided
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
   const url = `${proto}://${host}/e/${event.shareToken}`;
-  const message = `【${event.title}】${formatDateTime(decided.startAt)} に決まりました！`;
 
   return (
     <main className="flex flex-1 flex-col pt-11">
@@ -58,9 +57,7 @@ export default async function DecidedPage(props: PageProps<"/events/[id]/decided
         >
           カレンダーに追加
         </a>
-        <a href={lineShareUrl(message, url)} target="_blank" rel="noopener noreferrer" className={buttonClassName("accent")}>
-          LINEでみんなに知らせる
-        </a>
+        <CopyLinkButton url={url} label="リンクをコピーしてみんなに知らせる" />
         <Link href="/home" className={buttonClassName("secondary")}>
           ホームへ
         </Link>

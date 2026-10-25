@@ -79,7 +79,7 @@ const EditEventInput = z.object({
   deadlineAt: z.coerce.date(),
 });
 
-// E1「保存する」: 名前・人数・締切だけ変えられる。保存後は S3 に戻り、LINE共有を出す
+// E1「保存する」: 名前・人数・締切だけ変えられる。保存後は S3 に戻り、リンクのコピーを出す
 export async function updateEvent(eventId: string, input: z.input<typeof EditEventInput>) {
   const user = await requireUser(`/events/${eventId}/edit`);
   const event = await prisma.event.findUnique({ where: { id: eventId }, select: { ownerId: true, status: true } });

@@ -26,9 +26,9 @@ export default async function SharePage(props: PageProps<"/events/[id]/share">) 
         <p className="rotate-5 rounded-pill bg-accent px-3 py-1.5 text-[13px] leading-[1.4] font-bold tracking-[0.26px]">{event.title}</p>
         <h1 className="w-full text-center font-display text-[40px] leading-[1.2] text-white">できた！</h1>
         <p className="w-full text-center text-[15px] leading-[1.6] font-medium text-white">
-          このリンクを、LINEなどに貼るだけ。
+          このリンクを、相手に送るだけ。
           <br />
-          相手はLINEかGoogleでログインして答えるよ。
+          相手はログインして答えるよ。
         </p>
         <ShareButtons url={url} />
       </div>

@@ -6,7 +6,7 @@ import { buttonClassName } from "@/components/Button";
 import { TopBar } from "@/components/TopBar";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { lineShareUrl } from "@/lib/share";
+import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { CancelForm } from "./CancelForm";
 
 // E2 中止の確認 → E3 中止したよ
@@ -29,7 +29,6 @@ export default async function CancelPage(props: PageProps<"/events/[id]/cancel">
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
-  const message = `【${event.title}】は中止になりました${event.cancelNote ? `：${event.cancelNote}` : ""}`;
 
   return (
     <main className="flex flex-1 flex-col pt-11">
@@ -49,9 +48,7 @@ export default async function CancelPage(props: PageProps<"/events/[id]/cancel">
         </div>
       </div>
       <footer className="flex flex-col gap-2 px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">
-        <a href={lineShareUrl(message, `${proto}://${host}/e/${event.shareToken}`)} target="_blank" rel="noopener noreferrer" className={buttonClassName("accent")}>
-          LINEでみんなに知らせる
-        </a>
+        <CopyLinkButton url={`${proto}://${host}/e/${event.shareToken}`} label="リンクをコピーしてみんなに知らせる" />
         <Link href="/home" className={buttonClassName("primary")}>
           ホームへ
         </Link>

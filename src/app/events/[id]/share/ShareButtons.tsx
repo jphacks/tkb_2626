@@ -4,28 +4,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { pop, tap } from "@/lib/fx";
-
-// クリップボード API が使えない・断られたときは、昔ながらの選択→コピーで試す
-async function copyText(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.cssText = "position:fixed;opacity:0";
-    document.body.appendChild(ta);
-    ta.select();
-    let ok = false;
-    try {
-      ok = document.execCommand("copy");
-    } catch {
-      // コピーできない環境
-    }
-    ta.remove();
-    return ok;
-  }
-}
+import { copyText, withExternalBrowser } from "@/lib/share";
 
 // S2: リンクを見せて、コピーするだけ（送る手段は相手に合わせて自分で貼ってもらう）
 export function ShareButtons({ url }: { url: string }) {
@@ -35,7 +14,7 @@ export function ShareButtons({ url }: { url: string }) {
   async function copy() {
     tap();
     pop(iconRef.current, 1, 220);
-    setCopied((await copyText(url)) ? "ok" : "ng");
+    setCopied((await copyText(withExternalBrowser(url))) ? "ok" : "ng");
     setTimeout(() => setCopied(null), 2500);
   }
 
