@@ -83,19 +83,20 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
         <div className="h-2" />
 
-        <form action={signInWithLine} className="w-full">
-          <Button type="submit" variant="accent">
-            LINEで続ける
-          </Button>
-        </form>
 
         {showGoogle && (
           <form action={signInWithGoogle} className="w-full">
-            <Button type="submit" variant="secondary">
+            <Button type="submit" variant="accent">
               Googleで続ける
             </Button>
           </form>
         )}
+
+        <form action={signInWithLine} className="w-full">
+          <Button type="submit" variant="secondary">
+            LINEで続ける
+          </Button>
+        </form>
 
         {showEmail && (
           <details className="group w-full">
