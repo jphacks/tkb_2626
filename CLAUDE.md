@@ -199,7 +199,7 @@ model Nudge {
   - カレンダーの解除は calendarProvider を null にするだけ。Account は消さない（ログインに使っている Account を消すとログインできなくなる）
   - 連携で `OAuthAccountNotLinked` などのエラーになったら `/settings?error=…` に戻す（`pages.error` を設定）
 - カレンダー取得: Google `calendars/primary/events`（singleEvents=true）、Microsoft Graph `/me/calendarView`。読む前に `expires_at` を見て切れていればリフレッシュトークンで更新し、Account に保存
-- AI: `@anthropic-ai/sdk`、`client.beta.messages.parse`、model `claude-opus-5-5`、`max_tokens: 4000`、`output_config: { effort: "low", format: zodOutputFormat(schema) }`（引数は schema の1つ）、`betas: ["server-side-fallback-2026-07-01"]`、`fallbacks: "default"`。サーバー側だけで呼ぶ
+- AI: `@anthropic-ai/sdk`、`client.beta.messages.parse`、model `claude-sonnet-5-5`、`max_tokens: 4000`、`output_config: { effort: "low", format: zodOutputFormat(schema) }`（引数は schema の1つ）、`betas: ["server-side-fallback-2026-07-01"]`、`fallbacks: "default"`。サーバー側だけで呼ぶ
 - 書き込みは Server Actions。Route Handler は `/api/auth/*` と `/events/[id]/calendar.ics` だけ
 - middleware（proxy）は使わない。ログイン確認は各ページと Server Actions で `auth()`
 - LINE 共有は `https://line.me/R/share?text=<URLエンコードした文面とURL>`。共有する URL には `?openExternalBrowser=1` を付ける（LINE内ブラウザだと Google ログインが拒否される）
