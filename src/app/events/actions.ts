@@ -57,3 +57,18 @@ export async function createEvent(input: CreateEventInput) {
 
   redirect(`/events/${event.id}/share`);
 }
+
+// D1「〜に決める」: 送り手だけ。締切前でも後でも決められる
+export async function decideEvent(eventId: string, candidateId: string) {
+  const user = await requireUser(`/events/${eventId}/decide`);
+  const event = await prisma.event.findUnique({ where: { id: eventId }, include: { candidates: { select: { id: true } } } });
+  if (!event || event.ownerId !== user.id) throw new Error("not found");
+  if (event.status !== "OPEN") redirect(`/events/${eventId}`);
+  if (!event.candidates.some((c) => c.id === candidateId)) throw new Error("候補日が見つかりません");
+
+  await prisma.event.update({
+    where: { id: eventId },
+    data: { status: "DECIDED", decidedCandidateId: candidateId, decidedAt: new Date() },
+  });
+  redirect(`/events/${eventId}/decided`);
+}

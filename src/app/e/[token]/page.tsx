@@ -6,12 +6,18 @@ import { getCalendarEvents } from "@/lib/calendar";
 import { loadInvite } from "@/lib/invite";
 import { addDays, formatDateTime, fromJst, toJstParts, WEEKDAYS } from "@/lib/time";
 import { joinEvent } from "./actions";
+import { DecidedView } from "./DecidedView";
 
 const key = (p: { year: number; month: number; day: number }) => `${p.year}-${p.month}-${p.day}`;
 
 export default async function InvitePage(props: PageProps<"/e/[token]">) {
   const { token } = await props.params;
   const { user, event, participation, canAnswer, ownerName } = await loadInvite(token, `/e/${token}`);
+
+  if (event.status === "DECIDED") {
+    if (participation.attendance === "DECLINED") redirect(`/e/${token}/declined`);
+    return <DecidedView token={token} eventId={event.id} />;
+  }
 
   if (event.status === "OPEN") {
     if (participation.attendance === "DECLINED") redirect(`/e/${token}/declined`);
