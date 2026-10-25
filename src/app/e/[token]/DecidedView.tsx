@@ -23,7 +23,7 @@ export async function DecidedView({ token, eventId }: { token: string; eventId: 
 
   return (
     <main className="flex flex-1 flex-col pt-11">
-      <TopBar title="日程が決まったよ" backHref="/home" />
+      <TopBar title="日程が決まったよ" backHref="/home?tab=received" home="/home?tab=received" />
       <div className="flex flex-1 flex-col gap-3 px-6 pt-1">
         <div className="flex w-full items-start gap-2.5 rounded-md bg-sunken p-3">
           <Image src="/figma/mascot-sloth-d3.svg" alt="" width={36} height={36} />

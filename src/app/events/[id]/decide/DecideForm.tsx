@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/Button";
 import { formatDay, formatTime } from "@/lib/time";
 import { decideEvent } from "../../actions";
+import { tap } from "@/lib/fx";
 
 type Row = { id: string; startAt: string; endAt: string; yes: number; maybe: number; no: number };
 
@@ -31,7 +32,10 @@ export function DecideForm({ eventId, headline, bestId, rows }: { eventId: strin
             <button
               key={r.id}
               type="button"
-              onClick={() => setSelected(r.id)}
+              onClick={() => {
+                tap();
+                setSelected(r.id);
+              }}
               className={`flex w-full flex-col gap-2 rounded-md p-3.5 text-left shadow-soft ${on ? "border-[2.5px] border-brand bg-brand-soft" : "bg-card"}`}
             >
               <span className="flex w-full items-center gap-2">

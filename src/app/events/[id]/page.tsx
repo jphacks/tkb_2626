@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { buttonClassName } from "@/components/Button";
 import { Countdown } from "@/components/Countdown";
+import { MatomeButton } from "./MatomeButton";
 import { TopBar } from "@/components/TopBar";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -132,7 +133,12 @@ export default async function EventStatusPage(props: PageProps<"/events/[id]">) 
             <div className="grid grid-cols-3 gap-2">
               {waiting.map((p) => (
                 <div key={p.id} className="flex flex-col items-center gap-1.5 rounded-md bg-card px-2 py-3 shadow-soft">
-                  <span className="flex size-[52px] items-center justify-center rounded-pill border-3 border-alert bg-card font-display text-xl">{initial(p.user.name)}</span>
+                  <span
+                    data-wait-avatar=""
+                    className="flex size-[52px] items-center justify-center rounded-pill border-3 border-alert bg-card font-display text-xl"
+                  >
+                    {initial(p.user.name)}
+                  </span>
                   <p className="w-full truncate text-center text-[15px] leading-[1.6] font-bold">{p.user.name}</p>
                   <p className="w-full truncate text-center text-xs leading-[1.5] font-medium text-ink-sub">
                     {p.status === "DECLARED" ? `${p.replyByLabel}に返す` : "未回答"}
@@ -216,9 +222,7 @@ export default async function EventStatusPage(props: PageProps<"/events/[id]">) 
         <footer className="flex flex-col gap-2 px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">
           {waiting.length > 0 && beforeDeadline && !allReplied ? (
             <>
-              <Link href={`/events/${id}/nudge?to=all`} className={buttonClassName("accent", "!bg-alert")}>
-                まだの{waiting.length}人をまとめて連打
-              </Link>
+              <MatomeButton href={`/events/${id}/nudge?to=all`} label={`まだの${waiting.length}人をまとめて連打`} />
               <Link href={`/events/${id}/decide`} className="py-2 text-center text-[15px] leading-[1.6] font-bold text-brand">
                 日程を決める →
               </Link>

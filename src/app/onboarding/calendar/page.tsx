@@ -25,7 +25,7 @@ export default async function CalendarOnboardingPage(props: PageProps<"/onboardi
 
   return (
     <main className="flex flex-1 flex-col pt-11">
-      <TopBar title="はじめに" />
+      <TopBar title="はじめに" home={null} />
       <form className="flex flex-1 flex-col">
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <div className="flex flex-1 flex-col gap-4 px-6 pt-2">
@@ -53,7 +53,7 @@ export default async function CalendarOnboardingPage(props: PageProps<"/onboardi
             </Button>
           </div>
 
-          <div className="flex items-start gap-2 rounded-md bg-card p-3 shadow-soft">
+          <div className="mt-3 flex items-start gap-2 rounded-md bg-card p-3 shadow-soft">
             <Image src="/figma/icon-check-16.svg" alt="" width={16} height={16} className="mt-0.5" />
             <p className="flex-1 text-xs leading-[1.5] font-medium text-ink-sub">予定の中身は相手に見えません。空いてる／埋まってるだけを使います。</p>
           </div>
@@ -87,7 +87,7 @@ function Illustration() {
       </span>
       <Image src="/figma/c3-star-1.svg" alt="" width={26} height={26} className="absolute top-[12px] left-[17.5px] rotate-10" />
       <Image src="/figma/c3-star-2.svg" alt="" width={18} height={18} className="absolute top-[-2px] left-[301.7px] -rotate-12" />
-      <Image src="/figma/c3-star-3.svg" alt="" width={22} height={22} className="absolute top-[150px] left-[310px]" />
+      <Image src="/figma/c3-star-3.svg" alt="" width={22} height={22} className="absolute top-[176px] left-[318px]" />
     </div>
   );
 }

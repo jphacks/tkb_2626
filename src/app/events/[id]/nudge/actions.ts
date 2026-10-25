@@ -10,7 +10,7 @@ import { randomToken } from "@/lib/token";
 // S4「〜をプレゼントで送る」: 相手ごとに Nudge を作って P1 へ
 export async function sendNudges(eventId: string, to: string, count: number) {
   const user = await requireUser(`/events/${eventId}`);
-  const n = z.number().int().min(1).max(100).parse(count);
+  const n = z.number().int().min(1).max(999).parse(count);
   const result = await nudgeTargets(eventId, user.id, to);
   if (!result || !result.open || result.targets.length === 0) redirect(`/events/${eventId}`);
 

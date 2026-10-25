@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { buttonClassName } from "@/components/Button";
 import { GENRE_ICON_SMALL } from "@/lib/genre";
+import { tap } from "@/lib/fx";
 import { toJstParts } from "@/lib/time";
 
 export type HistoryItem = {
@@ -35,7 +36,13 @@ export function HistoryDrum({ items }: { items: HistoryItem[] }) {
         <div className="pointer-events-none absolute top-0 bottom-0 left-24 w-px bg-sunken" />
         <div
           ref={ref}
-          onScroll={(e) => setIndex(Math.max(0, Math.min(items.length - 1, Math.round(e.currentTarget.scrollTop / ROW))))}
+          onScroll={(e) => {
+            const i = Math.max(0, Math.min(items.length - 1, Math.round(e.currentTarget.scrollTop / ROW)));
+            if (i !== index) {
+              tap();
+              setIndex(i);
+            }
+          }}
           className="relative h-full snap-y snap-mandatory overflow-y-scroll [scrollbar-width:none]"
           style={{ paddingTop: pad, paddingBottom: pad }}
         >

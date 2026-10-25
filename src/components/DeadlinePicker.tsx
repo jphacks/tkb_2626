@@ -1,5 +1,7 @@
 "use client";
 
+import { Drum } from "@/components/Drum";
+import { tap } from "@/lib/fx";
 import { addDays, fromJst, toJstParts, WEEKDAYS } from "@/lib/time";
 
 const DEADLINE_PRESETS = [
@@ -30,6 +32,10 @@ export function DeadlinePicker({
   const v = toJstParts(value);
   const dayOptions = Array.from({ length: 30 }, (_, i) => toJstParts(addDays(now, i)));
   const minuteOptions = [0, 15, 30, 45];
+  const dayLabels = dayOptions.map((d) => `${d.month}/${d.day}（${WEEKDAYS[d.weekday]}）`);
+  const dayIndex = dayOptions.findIndex((d) => d.year === v.year && d.month === v.month && d.day === v.day);
+  const hourLabels = Array.from({ length: 24 }, (_, h) => String(h));
+  const minuteLabels = minuteOptions.map((m) => String(m).padStart(2, "0"));
   const set = (patch: Partial<{ year: number; month: number; day: number; hour: number; minute: number }>) => {
     const n = { ...v, ...patch };
     onCustom(fromJst(n.year, n.month, n.day, n.hour, n.minute));
@@ -42,53 +48,29 @@ export function DeadlinePicker({
           <button
             key={p.key}
             type="button"
-            onClick={() => (p.key === "custom" ? onCustom(value) : onPreset(p.key, p.days))}
+            onClick={() => {
+              tap();
+              if (p.key === "custom") onCustom(value);
+              else onPreset(p.key, p.days);
+            }}
             className={`rounded-pill px-3 py-1.5 text-[13px] leading-[1.4] font-bold tracking-[0.26px] ${selectedKey === p.key ? "bg-brand text-white" : "bg-sunken text-ink shadow-soft"}`}
           >
             {p.label}
           </button>
         ))}
       </div>
-      <div className="flex items-center rounded-md bg-sunken p-2 text-[17px] font-bold">
-        <select
-          aria-label="日付"
-          value={`${v.year}-${v.month}-${v.day}`}
-          onChange={(e) => {
-            const [year, month, day] = e.target.value.split("-").map(Number);
-            set({ year, month, day });
-          }}
-          className="flex-1 appearance-none bg-transparent py-2 text-center outline-none"
-        >
-          {dayOptions.map((d) => (
-            <option key={`${d.year}-${d.month}-${d.day}`} value={`${d.year}-${d.month}-${d.day}`}>
-              {d.month}/{d.day}（{WEEKDAYS[d.weekday]}）
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="時"
-          value={v.hour}
-          onChange={(e) => set({ hour: Number(e.target.value) })}
-          className="flex-1 appearance-none bg-transparent py-2 text-center outline-none"
-        >
-          {Array.from({ length: 24 }, (_, h) => (
-            <option key={h} value={h}>
-              {h}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="分"
-          value={v.minute}
-          onChange={(e) => set({ minute: Number(e.target.value) })}
-          className="flex-1 appearance-none bg-transparent py-2 text-center outline-none"
-        >
-          {minuteOptions.map((m) => (
-            <option key={m} value={m}>
-              {String(m).padStart(2, "0")}
-            </option>
-          ))}
-        </select>
+      {/* ドラムで日付・時・分を回す。中央の白い帯が選んでいる値 */}
+      <div className="relative flex items-center gap-1 rounded-md bg-sunken px-2 py-1">
+        <span className="pointer-events-none absolute inset-x-2 top-1/2 h-[34px] -translate-y-1/2 rounded-sm bg-card shadow-[0_2px_6px_rgba(27,31,59,0.06)]" />
+        <div className="relative flex-[1.6_0_0]">
+          <Drum label="日付" values={dayLabels} index={Math.max(0, dayIndex)} onChange={(i) => set({ year: dayOptions[i].year, month: dayOptions[i].month, day: dayOptions[i].day })} />
+        </div>
+        <div className="relative flex-1">
+          <Drum label="時" values={hourLabels} index={v.hour} onChange={(h) => set({ hour: h })} />
+        </div>
+        <div className="relative flex-1">
+          <Drum label="分" values={minuteLabels} index={Math.max(0, minuteOptions.indexOf(v.minute))} onChange={(i) => set({ minute: minuteOptions[i] })} />
+        </div>
       </div>
       {value <= now && <p className="text-xs leading-[1.5] font-medium text-ink-sub">締切は今より後にしてね</p>}
     </div>

@@ -19,7 +19,7 @@ export default async function AnswerPage(props: PageProps<"/e/[token]/answer">) 
 
   return (
     <main className="flex flex-1 flex-col pt-11">
-      <TopBar title="日程の回答" />
+      <TopBar title="日程の回答" home="/home?tab=received" />
       <Suspense fallback={<Drafting />}>
         <AnswerSection token={token} invite={invite} />
       </Suspense>

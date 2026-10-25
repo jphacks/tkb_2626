@@ -131,9 +131,9 @@ export default async function LoginPage(props: PageProps<"/login">) {
       </div>
 
       {/* 飾りの星（Figma の位置どおり） */}
-      <Image src="/figma/star-yellow-l.svg" alt="" width={30} height={30} className="pointer-events-none absolute top-[122.8px] left-[36.6px] rotate-12" />
-      <Image src="/figma/star-teal.svg" alt="" width={20} height={20} className="pointer-events-none absolute top-[98.1px] left-[321.6px] -rotate-10" />
-      <Image src="/figma/star-yellow-s.svg" alt="" width={14} height={14} className="pointer-events-none absolute top-[250px] left-[300px]" />
+      <Image src="/figma/star-yellow-l.svg" alt="" width={30} height={30} className="pointer-events-none absolute top-[152.8px] left-[20.8px] rotate-12" />
+      <Image src="/figma/star-teal.svg" alt="" width={20} height={20} className="pointer-events-none absolute top-[119.6px] left-[345.6px] -rotate-10" />
+      <Image src="/figma/star-yellow-s.svg" alt="" width={14} height={14} className="pointer-events-none absolute top-[50px] left-[336px]" />
 
       <footer className="px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">
         <p className="text-center text-xs leading-[1.5] font-medium text-ink-sub">

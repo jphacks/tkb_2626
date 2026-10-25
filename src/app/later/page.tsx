@@ -32,7 +32,7 @@ export default async function LaterPage() {
 
   return (
     <main className="flex flex-1 flex-col pt-11">
-      <TopBar title="あとで返す" backHref="/home?tab=received" />
+      <TopBar title="あとで返す" backHref="/home?tab=received" home="/home?tab=received" />
       <div className="flex flex-1 flex-col gap-3 px-6 pt-1 pb-8">
         <div className="flex items-center gap-3">
           <Image src="/figma/mascot-sloth-later.svg" alt="" width={52} height={52} />

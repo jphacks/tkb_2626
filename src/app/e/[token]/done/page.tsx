@@ -16,7 +16,14 @@ export default async function DonePage(props: PageProps<"/e/[token]/done">) {
 
   return (
     <main className="flex flex-1 flex-col pt-11">
-      <TopBar />
+      <TopBar
+        home="/home?tab=received"
+        leading={
+          <Link href="/home?tab=received" className="shrink-0 px-1 py-1.5 text-[15px] leading-[1.5] font-bold text-brand">
+            ‹ ホームへ
+          </Link>
+        }
+      />
       <div className="flex flex-1 flex-col items-center gap-4 px-6 pt-2">
         <div className="relative flex w-full flex-col items-center gap-2 pt-6 pb-2">
           <span className="flex size-28 rotate-6 items-center justify-center rounded-pill bg-brand shadow-pop">

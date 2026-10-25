@@ -6,6 +6,7 @@ import { useState } from "react";
 import { buttonClassName } from "@/components/Button";
 import { lineShareUrl } from "@/lib/share";
 import { setNudgeMessage } from "../actions";
+import { tap } from "@/lib/fx";
 
 type Gift = { id: string; toName: string; url: string };
 
@@ -22,6 +23,7 @@ export function GiftShare({ eventId, count, message: initial, senderName, gifts 
   }
 
   async function copy(g: Gift) {
+    tap();
     await save();
     await navigator.clipboard.writeText(g.url);
     setCopied(g.id);
@@ -31,7 +33,8 @@ export function GiftShare({ eventId, count, message: initial, senderName, gifts 
   return (
     <>
       <div className="flex flex-1 flex-col items-center gap-3.5 px-6 pt-5">
-        <div className="relative size-[200px] shrink-0">
+        {/* プレゼントがときどきゆれる */}
+        <div className="fx-loop relative size-[200px] shrink-0 origin-[50%_90%] animate-[wobble_2.6s_ease-in-out_infinite]">
           <div className="absolute top-[66px] left-[15px] h-[130px] w-[170px] overflow-hidden rounded-md bg-accent shadow-pop">
             <span className="absolute inset-y-0 left-[73px] w-6 bg-brand" />
           </div>

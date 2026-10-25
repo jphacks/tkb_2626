@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/Button";
+import { Drum } from "@/components/Drum";
+import { pop, tap } from "@/lib/fx";
 import { TopBar } from "@/components/TopBar";
 import type { SlotSuggestion } from "@/lib/suggest";
 import { addDays, formatDateTime, formatDay, formatRange, fromJst, toJstParts, WEEKDAYS } from "@/lib/time";
@@ -34,7 +36,6 @@ const STEPS = [
   { label: "締切", ask: "いつまでに返事がほしい？", hint: "いつまでに返事がほしい？" },
 ];
 
-const SLOT_MS = 2 * 60 * 60 * 1000;
 export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { suggestions: SlotSuggestion[]; busyDays: string[]; now: string }) {
   const now = useMemo(() => new Date(nowIso), [nowIso]);
 
@@ -50,6 +51,8 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
   const [deadlineKey, setDeadlineKey] = useState<DeadlineKey>("3d");
   const [deadline, setDeadline] = useState(() => presetDeadline(now, 3));
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const headcountRef = useRef<HTMLSpanElement>(null);
 
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +69,25 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
     formatDateTime(deadline),
   ];
 
+  // 人数の＋−：はじに来たら強めに鳴らすだけ。変わったら数字を弾ませる
+  function bumpHeadcount(d: number) {
+    const n = Math.max(2, Math.min(50, headcount + d));
+    if (n === headcount) return tap(true);
+    tap();
+    setHeadcount(n);
+    pop(headcountRef.current, 1.25, 160);
+  }
+
+  // 候補日を消すときは横にすっと消してから外す
+  function removeCandidate(startAt: string) {
+    tap();
+    setRemoving(startAt);
+    setTimeout(() => {
+      setCandidates((prev) => prev.filter((p) => p.startAt !== startAt));
+      setRemoving(null);
+    }, 180);
+  }
+
   function confirmStep(i: number) {
     const next = confirmed.map((c, j) => (j === i ? true : c));
     setConfirmed(next);
@@ -73,6 +95,7 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
   }
 
   function addCandidate(c: Candidate) {
+    tap(true);
     setCandidates((prev) =>
       prev.some((p) => p.startAt === c.startAt) ? prev : [...prev, c].sort((a, b) => a.startAt.localeCompare(b.startAt)),
     );
@@ -128,7 +151,10 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
                         <button
                           key={g.value}
                           type="button"
-                          onClick={() => setGenre(genre === g.value ? null : g.value)}
+                          onClick={() => {
+                            tap();
+                            setGenre(genre === g.value ? null : g.value);
+                          }}
                           className={`flex items-center gap-1 rounded-pill px-2.5 py-1.5 text-[13px] leading-[1.4] font-bold tracking-[0.26px] ${genre === g.value ? "bg-accent-soft" : "bg-sunken"}`}
                         >
                           <Image src={g.icon} alt="" width={22} height={22} />
@@ -153,19 +179,19 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
                       <button
                         type="button"
                         aria-label="減らす"
-                        onClick={() => setHeadcount((n) => Math.max(2, n - 1))}
+                        onClick={() => bumpHeadcount(-1)}
                         className="flex size-11 items-center justify-center rounded-pill bg-card font-display text-xl"
                       >
                         −
                       </button>
                       <p className="flex items-baseline gap-0.5">
-                        <span className="font-display text-[28px] leading-[1.3]">{headcount}</span>
+                        <span ref={headcountRef} className="inline-block font-display text-[28px] leading-[1.3]">{headcount}</span>
                         <span className="text-[15px] font-bold">人</span>
                       </p>
                       <button
                         type="button"
                         aria-label="増やす"
-                        onClick={() => setHeadcount((n) => Math.min(50, n + 1))}
+                        onClick={() => bumpHeadcount(1)}
                         className="flex size-11 items-center justify-center rounded-pill bg-brand font-display text-xl text-white"
                       >
                         ＋
@@ -183,7 +209,10 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
                         <button
                           key={p.value}
                           type="button"
-                          onClick={() => setPriority(p.value)}
+                          onClick={() => {
+                            tap();
+                            setPriority(p.value);
+                          }}
                           className={`flex w-full items-center gap-2.5 rounded-md p-3 text-left ${selected ? "border-2 border-alert bg-accent-soft" : "bg-sunken"}`}
                         >
                           <span className="flex flex-1 flex-col">
@@ -200,7 +229,10 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
                 {i === 3 && (
                   <div className="flex flex-col gap-2.5">
                     {candidates.map((c) => (
-                      <div key={c.startAt} className="flex w-full items-center gap-2 rounded-sm bg-accent-soft p-2.5">
+                      <div
+                        key={c.startAt}
+                        className={`flex w-full items-center gap-2 rounded-sm bg-accent-soft p-2.5 transition duration-200 ${removing === c.startAt ? "translate-x-6 opacity-0" : ""}`}
+                      >
                         <Image src="/figma/icon-calendar-s1.svg" alt="" width={18} height={18} />
                         <div className="flex min-w-0 flex-1 flex-col">
                           <p className="text-[15px] leading-[1.6] font-bold">{formatRange(new Date(c.startAt), new Date(c.endAt))}</p>
@@ -209,7 +241,7 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
                         <button
                           type="button"
                           aria-label="この候補日を消す"
-                          onClick={() => setCandidates((prev) => prev.filter((p) => p.startAt !== c.startAt))}
+                          onClick={() => removeCandidate(c.startAt)}
                           className="flex size-7 items-center justify-center rounded-pill bg-card text-[15px] font-bold text-ink-sub"
                         >
                           ×
@@ -309,6 +341,9 @@ export function CreateEventWizard({ suggestions, busyDays, now: nowIso }: { sugg
   );
 }
 
+// 候補日の時刻（7:00〜23:00、30分きざみ）
+const TIMES = Array.from({ length: 33 }, (_, i) => `${String(7 + Math.floor(i / 2)).padStart(2, "0")}:${i % 2 ? "30" : "00"}`);
+
 function AddCandidateSheet({
   now,
   busyDays,
@@ -325,8 +360,8 @@ function AddCandidateSheet({
   const tomorrow = toJstParts(addDays(now, 1));
   const [view, setView] = useState({ year: tomorrow.year, month: tomorrow.month });
   const [picked, setPicked] = useState<{ year: number; month: number; day: number } | null>(null);
-  const [hour, setHour] = useState(18);
-  const [minute, setMinute] = useState(0);
+  const [startIdx, setStartIdx] = useState(TIMES.indexOf("18:00"));
+  const [endIdx, setEndIdx] = useState(TIMES.indexOf("20:00"));
 
   const firstWeekday = toJstParts(fromJst(view.year, view.month, 1, 12)).weekday;
   const daysInMonth = new Date(Date.UTC(view.year, view.month, 0)).getUTCDate();
@@ -344,9 +379,13 @@ function AddCandidateSheet({
       return m < 1 ? { year: v.year - 1, month: 12 } : m > 12 ? { year: v.year + 1, month: 1 } : { year: v.year, month: m };
     });
 
-  const start = picked ? fromJst(picked.year, picked.month, picked.day, hour, minute) : null;
-  const end = start ? new Date(start.getTime() + SLOT_MS) : null;
-  const pad = (n: number) => String(n).padStart(2, "0");
+  const at = (idx: number) => {
+    if (!picked) return null;
+    const [h, m] = TIMES[idx].split(":").map(Number);
+    return fromJst(picked.year, picked.month, picked.day, h, m);
+  };
+  const start = at(startIdx);
+  const end = at(endIdx);
 
   return (
     <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col justify-end">
@@ -395,26 +434,24 @@ function AddCandidateSheet({
             );
           })}
         </div>
-        <div className="flex items-center gap-2.5 rounded-md bg-sunken p-2.5">
-          <p className="text-[15px] leading-[1.6] font-bold whitespace-nowrap">{start ? formatDay(start) : "日付を選んでね"}</p>
-          <div className="flex flex-1 items-center justify-end gap-1 font-dot text-[22px] text-brand">
-            <select aria-label="開始時" value={hour} onChange={(e) => setHour(Number(e.target.value))} className="appearance-none bg-transparent outline-none">
-              {Array.from({ length: 17 }, (_, i) => i + 6).map((h) => (
-                <option key={h} value={h}>
-                  {pad(h)}
-                </option>
-              ))}
-            </select>
-            <span>:</span>
-            <select aria-label="開始分" value={minute} onChange={(e) => setMinute(Number(e.target.value))} className="appearance-none bg-transparent outline-none">
-              {[0, 30].map((m) => (
-                <option key={m} value={m}>
-                  {pad(m)}
-                </option>
-              ))}
-            </select>
-            <span>–</span>
-            <span>{end ? `${pad(toJstParts(end).hour)}:${pad(toJstParts(end).minute)}` : `${pad((hour + 2) % 24)}:${pad(minute)}`}</span>
+        <div className="flex items-center gap-2.5 rounded-md bg-sunken px-2.5 py-1">
+          <p className="text-[15px] leading-[1.6] font-bold whitespace-nowrap">{picked ? formatDay(fromJst(picked.year, picked.month, picked.day, 12)) : "日付を選んでね"}</p>
+          {/* 開始と終了をドラムで回す */}
+          <div className="relative ml-auto flex w-[210px] items-center gap-1.5">
+            <span className="pointer-events-none absolute inset-x-0 top-1/2 h-[30px] -translate-y-1/2 rounded-sm bg-card" />
+            <div className="relative flex-1">
+              <Drum label="開始" variant="time" itemHeight={28} values={TIMES} index={startIdx} onChange={(i) => {
+                setStartIdx(i);
+                if (endIdx <= i) setEndIdx(Math.min(TIMES.length - 1, i + 2));
+              }} />
+            </div>
+            <span className="relative font-dot text-[22px] text-brand">–</span>
+            <div className="relative flex-1">
+              <Drum label="終了" variant="time" itemHeight={28} values={TIMES} index={endIdx} onChange={(i) => {
+                setEndIdx(i);
+                if (i <= startIdx) setStartIdx(Math.max(0, i - 2));
+              }} />
+            </div>
           </div>
         </div>
         <Button

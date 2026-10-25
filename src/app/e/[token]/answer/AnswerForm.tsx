@@ -7,6 +7,7 @@ import { Button, buttonClassName } from "@/components/Button";
 import { REPLY_LABELS } from "@/lib/invite-labels";
 import { formatDay, formatTime, toJstParts, WEEKDAYS } from "@/lib/time";
 import { clearDeclaration, declareReply, submitAnswers } from "../actions";
+import { pop, tap } from "@/lib/fx";
 
 type DayEvent = { title: string; start: string; end: string };
 type Candidate = {
@@ -129,7 +130,14 @@ export function AnswerForm(props: {
               </button>
               <div className="flex gap-1.5">
                 {(["YES", "MAYBE", "NO"] as const).map((m) => (
-                  <button key={m} type="button" onClick={() => pick(c.id, m)} aria-pressed={v.value === m} aria-label={{ YES: "○", MAYBE: "△", NO: "×" }[m]}>
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={(e) => {
+                      pick(c.id, m);
+                      tap();
+                      pop(e.currentTarget);
+                    }} aria-pressed={v.value === m} aria-label={{ YES: "○", MAYBE: "△", NO: "×" }[m]}>
                     <AnswerChip mark={m} selected={v.value === m} />
                   </button>
                 ))}

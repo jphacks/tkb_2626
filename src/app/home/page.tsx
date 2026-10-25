@@ -25,7 +25,8 @@ export default async function HomePage(props: PageProps<"/home">) {
   return (
     <main className="relative flex flex-1 flex-col pt-11">
       <TopBar
-        title="ホーム"
+        logoFirst
+        home={received ? "/home?tab=received" : "/home"}
         action={
           <Link href="/settings" aria-label="設定" className="flex size-9 items-center justify-center rounded-pill bg-sunken">
             <Image src="/figma/icon-settings.svg" alt="" width={24} height={24} />

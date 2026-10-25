@@ -46,3 +46,76 @@ body {
   0%, 33%, 66% { opacity: 0.85; }
   16%, 50%, 83%, 100% { opacity: 0; }
 }
+
+/* 連打：落ちてきて積もる「はよ〜〜！」 */
+@keyframes pile-drop {
+  0% { transform: translateY(-260px); opacity: 0.3; }
+  75% { transform: translateY(0); opacity: 1; }
+  88% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+/* 連打：擬音がふわっと出て消える（--r 回転、--s 大きさ） */
+@keyframes ono-pop {
+  0% { transform: rotate(var(--r)) scale(calc(var(--s) * 0.4)); opacity: 0; }
+  15% { transform: rotate(var(--r)) scale(calc(var(--s) * 1.12)); opacity: 1; }
+  45% { transform: rotate(var(--r)) scale(var(--s)); opacity: 1; }
+  100% { transform: rotate(var(--r)) scale(var(--s)) translateY(-12px); opacity: 0; }
+}
+
+/* まとめて連打：ボタンのまわりに広がる輪 */
+@keyframes ring-out {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* ゆっくり脈打つ */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+/* プレゼントがときどきゆれる */
+@keyframes wobble {
+  0%, 62%, 100% { transform: rotate(0); }
+  70% { transform: rotate(-7deg); }
+  80% { transform: rotate(7deg); }
+  90% { transform: rotate(-3deg); }
+}
+
+/* ぽんっと出てくる */
+@keyframes pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 湯気が上がる */
+@keyframes steam {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-14px); opacity: 0.3; }
+}
+
+/* 光らせる */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* 「光とバイブを弱める」と OS の「視差効果を減らす」のときは、くり返す動きを止める */
+[data-calm="1"] .fx-loop { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .fx-loop { animation: none !important; }
+}
+
+/* 開封：ナマケモノが上から叩きつけるように登場 */
+@keyframes slam {
+  0% { transform: scale(2.2); opacity: 0; }
+  80% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* 小刻みに震える */
+@keyframes jitter {
+  0% { transform: translateX(-3px); }
+  100% { transform: translateX(3px); }
+}

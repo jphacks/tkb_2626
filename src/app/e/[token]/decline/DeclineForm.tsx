@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Button, buttonClassName } from "@/components/Button";
 import { declineEvent } from "../actions";
+import { tap } from "@/lib/fx";
 
 const TEMPLATES = ["今回はごめん！", "また誘って", "予定が合わなくて"];
 
@@ -34,7 +35,10 @@ export function DeclineForm({ token, title, ownerName, note: initial }: { token:
               <button
                 key={t}
                 type="button"
-                onClick={() => setNote(t)}
+                onClick={() => {
+                  tap();
+                  setNote(t);
+                }}
                 className={`rounded-pill px-3 py-1.5 text-[13px] leading-[1.4] font-bold tracking-[0.26px] ${note === t ? "bg-brand text-white" : "bg-sunken shadow-soft"}`}
               >
                 {t}
