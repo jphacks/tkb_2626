@@ -40,12 +40,6 @@ export default async function DecidedPage(props: PageProps<"/events/[id]/decided
           <p className="text-center font-display text-[30px] leading-tight">{formatDateTime(decided.startAt)}</p>
           <p className="text-center text-xs leading-[1.5] font-medium">{attendees.length}人で参加</p>
         </section>
-        <a
-          href={`/events/${id}/calendar.ics`}
-          className="text-[13px] leading-[1.4] font-bold tracking-[0.26px] text-brand underline"
-        >
-          iPhone・Outlook のカレンダーに追加（.ics）
-        </a>
       </div>
 
       <footer className="flex flex-col gap-2 px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">

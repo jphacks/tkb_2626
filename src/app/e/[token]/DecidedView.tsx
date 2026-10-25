@@ -47,9 +47,6 @@ export async function DecidedView({ token, eventId }: { token: string; eventId: 
           {event.memo && <p className="text-xs leading-[1.5] font-medium whitespace-pre-wrap text-ink-sub">{event.memo}</p>}
           <p className="text-xs leading-[1.5] font-medium">参加：{attendees.map((p) => p.user.name).join("・")}</p>
         </section>
-        <a href={`/events/${event.id}/calendar.ics`} className="self-center text-[13px] leading-[1.4] font-bold tracking-[0.26px] text-brand underline">
-          iPhone・Outlook のカレンダーに追加（.ics）
-        </a>
       </div>
 
       <footer className="flex flex-col gap-2 px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">

@@ -33,7 +33,7 @@ export function HistoryDrum({ items }: { items: HistoryItem[] }) {
     <div className="flex flex-col gap-3 px-6 pt-1">
       <div className="relative h-[330px] overflow-hidden rounded-lg bg-card shadow-soft">
         <div className="pointer-events-none absolute inset-x-2 top-[141px] h-12 rounded-md border-y border-muted bg-brand-soft" />
-        <div className="pointer-events-none absolute top-0 bottom-0 left-24 w-px bg-sunken" />
+        <div className="pointer-events-none absolute top-0 bottom-0 left-[132px] w-px bg-sunken" />
         <div
           ref={ref}
           onScroll={(e) => {
@@ -59,7 +59,7 @@ export function HistoryDrum({ items }: { items: HistoryItem[] }) {
                 className="flex h-12 w-full snap-center items-center text-left font-bold"
                 style={{ opacity, fontSize: size }}
               >
-                <span className={`w-24 shrink-0 text-center whitespace-nowrap ${dist === 0 ? "text-brand" : ""}`}>
+                <span className={`w-[132px] shrink-0 text-center whitespace-nowrap ${dist === 0 ? "text-brand" : ""}`}>
                   {d.month}月 {d.day}日
                 </span>
                 <span className="flex min-w-0 items-center gap-2 pl-4">
