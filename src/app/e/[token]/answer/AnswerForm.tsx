@@ -3,12 +3,22 @@
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { AnswerChip, type Mark } from "@/components/AnswerChip";
-import { Button } from "@/components/Button";
+import { Button, buttonClassName } from "@/components/Button";
 import { REPLY_LABELS } from "@/lib/invite-labels";
-import { formatDay, formatTime } from "@/lib/time";
+import { formatDay, formatTime, toJstParts, WEEKDAYS } from "@/lib/time";
 import { clearDeclaration, declareReply, submitAnswers } from "../actions";
 
-type Candidate = { id: string; startAt: string; endAt: string; value: Mark | null; byAi: boolean; reason: string | null };
+type DayEvent = { title: string; start: string; end: string };
+type Candidate = {
+  id: string;
+  startAt: string;
+  endAt: string;
+  value: Mark | null;
+  byAi: boolean;
+  reason: string | null;
+  detail: string | null;
+  dayEvents: DayEvent[];
+};
 
 export function AnswerForm(props: {
   token: string;
@@ -19,6 +29,7 @@ export function AnswerForm(props: {
   deadline: string;
   note: string;
   declaredLabel: string | null;
+  calendarConnected: boolean;
   candidates: Candidate[];
 }) {
   const { token } = props;
@@ -26,6 +37,7 @@ export function AnswerForm(props: {
   const [note, setNote] = useState(props.note);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [sidebarFor, setSidebarFor] = useState<string | null>(null);
 
   const hasAi = props.candidates.some((c) => c.byAi);
   const allAnswered = [...values.values()].every((v) => v.value);
@@ -75,15 +87,35 @@ export function AnswerForm(props: {
         <div className="flex w-full items-center gap-2">
           {hasAi && <Image src="/figma/icon-sparkle-24.svg" alt="" width={24} height={24} />}
           <p className="text-[17px] leading-[1.5] font-bold whitespace-nowrap">{hasAi ? "AIが埋めておいたよ" : "いつなら行ける？"}</p>
-          <p className="flex-1 text-right text-xs leading-[1.5] font-medium text-ink-sub">{hasAi ? "違ったらタップで修正" : "タップで選んでね"}</p>
+          {!props.calendarConnected && (
+            <p className="flex-1 text-right text-xs leading-[1.5] font-medium text-ink-sub">{hasAi ? "違ったらタップで修正" : "タップで選んでね"}</p>
+          )}
+          {props.calendarConnected && <span className="flex-1" />}
+          {props.calendarConnected && props.candidates.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSidebarFor(props.candidates[0].id)}
+              className="flex shrink-0 items-center gap-1 rounded-pill bg-brand-soft px-2.5 py-1.5 text-[13px] leading-[1.4] font-bold tracking-[0.26px] text-brand"
+            >
+              <Image src="/figma/icon-calendar-s1.svg" alt="" width={14} height={14} />
+              カレンダー
+            </button>
+          )}
         </div>
+
+        {props.calendarConnected && hasAi && <p className="-mt-2 text-xs leading-[1.5] font-medium text-ink-sub">違ったらタップで修正。日付をタップすると、その日の予定が見られるよ</p>}
 
         {props.candidates.map((c) => {
           const v = values.get(c.id)!;
           const start = new Date(c.startAt);
           return (
             <div key={c.id} className="flex w-full items-center gap-3 rounded-md bg-card p-4 shadow-soft">
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <button
+                type="button"
+                disabled={!props.calendarConnected}
+                onClick={() => setSidebarFor(c.id)}
+                className="flex min-w-0 flex-1 flex-col gap-0.5 text-left"
+              >
                 <p className="font-display text-xl leading-[1.4]">{formatDay(start)}</p>
                 <p className="text-[15px] leading-[1.6] font-bold text-ink-sub">
                   {formatTime(start)}–{formatTime(new Date(c.endAt))}
@@ -94,7 +126,7 @@ export function AnswerForm(props: {
                     {c.reason}
                   </p>
                 )}
-              </div>
+              </button>
               <div className="flex gap-1.5">
                 {(["YES", "MAYBE", "NO"] as const).map((m) => (
                   <button key={m} type="button" onClick={() => pick(c.id, m)} aria-pressed={v.value === m} aria-label={{ YES: "○", MAYBE: "△", NO: "×" }[m]}>
@@ -158,6 +190,17 @@ export function AnswerForm(props: {
         )}
       </div>
 
+      {sidebarFor && (
+        <CalendarSidebar
+          candidates={props.candidates}
+          selectedId={sidebarFor}
+          values={values}
+          onSelect={setSidebarFor}
+          onPick={pick}
+          onClose={() => setSidebarFor(null)}
+        />
+      )}
+
       <div className="flex flex-col gap-2 px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">
         {error && <p className="text-center text-xs font-medium text-ink-sub">{error}</p>}
         <Button type="button" variant="primary" disabled={!allAnswered || pending} onClick={submit}>
@@ -165,5 +208,125 @@ export function AnswerForm(props: {
         </Button>
       </div>
     </>
+  );
+}
+
+const HOUR_PX = 40;
+const MARK_SYMBOL: Record<Mark, string> = { YES: "○", MAYBE: "△", NO: "×" };
+
+// R1-a v4: 候補日の1日の予定を横から出して確かめる
+function CalendarSidebar({
+  candidates,
+  selectedId,
+  values,
+  onSelect,
+  onPick,
+  onClose,
+}: {
+  candidates: Candidate[];
+  selectedId: string;
+  values: Map<string, { value: Mark | null; byAi: boolean }>;
+  onSelect: (id: string) => void;
+  onPick: (id: string, value: Mark) => void;
+  onClose: () => void;
+}) {
+  const c = candidates.find((x) => x.id === selectedId)!;
+  const start = new Date(c.startAt);
+  const end = new Date(c.endAt);
+  const blocks = [
+    ...c.dayEvents.map((e) => ({ title: `${e.title} ${formatTime(new Date(e.start))}–${formatTime(new Date(e.end))}`, start: new Date(e.start), end: new Date(e.end), candidate: false })),
+    { title: `候補 ${formatTime(start)}–${formatTime(end)}`, start, end, candidate: true },
+  ].sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  const hourOf = (d: Date) => {
+    const p = toJstParts(d);
+    return p.hour + p.minute / 60;
+  };
+  const firstHour = Math.min(9, Math.floor(Math.min(...blocks.map((b) => hourOf(b.start)))));
+  const lastHour = Math.max(20, Math.ceil(Math.max(...blocks.map((b) => hourOf(b.end) || 24))));
+  const top = (d: Date) => (hourOf(d) - firstHour) * HOUR_PX;
+  const gaps = blocks.slice(1).map((b, i) => ({ at: blocks[i].end, minutes: Math.round((b.start.getTime() - blocks[i].end.getTime()) / 60000) })).filter((g) => g.minutes > 0);
+  const current = values.get(c.id)?.value ?? null;
+  const day = toJstParts(start);
+
+  return (
+    <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] justify-end">
+      <button type="button" aria-label="閉じる" onClick={onClose} className="absolute inset-0 bg-ink/35" />
+      <aside className="relative flex h-full w-[304px] flex-col gap-3 overflow-y-auto rounded-l-[24px] bg-card px-4 pt-14 pb-6 shadow-[-6px_0_24px_rgba(24,50,56,0.25)]">
+        <div className="flex items-center gap-2 text-[17px] leading-[1.5] font-bold">
+          <p className="flex-1">あなたの予定</p>
+          <button type="button" onClick={onClose} aria-label="閉じる" className="-m-2 p-2 text-ink-sub">
+            ×
+          </button>
+        </div>
+        <div className="flex gap-1 text-center">
+          {candidates.map((x) => {
+            const p = toJstParts(new Date(x.startAt));
+            const on = x.id === selectedId;
+            return (
+              <button
+                key={x.id}
+                type="button"
+                onClick={() => onSelect(x.id)}
+                className={`flex flex-1 flex-col items-center rounded-sm p-1 ${on ? "bg-brand text-white" : "bg-accent-soft"}`}
+              >
+                <span className={`text-xs leading-[1.5] font-medium ${on ? "" : "text-ink-sub"}`}>{WEEKDAYS[p.weekday]}</span>
+                <span className="text-[15px] leading-[1.6] font-bold">{p.day}</span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[13px] leading-[1.4] font-bold tracking-[0.26px] text-ink-sub">
+          {day.month}月{day.day}日 の1日
+        </p>
+        <div className="relative w-full shrink-0" style={{ height: (lastHour - firstHour) * HOUR_PX }}>
+          {Array.from({ length: lastHour - firstHour }, (_, i) => (
+            <div key={i} className="absolute inset-x-0" style={{ top: i * HOUR_PX }}>
+              <p className="absolute -top-[9px] left-0 text-xs leading-[1.5] font-medium text-ink-sub">{firstHour + i}:00</p>
+              <span className="absolute left-[46px] right-0 h-px bg-sunken" />
+            </div>
+          ))}
+          {blocks.map((b, i) => (
+            <div
+              key={i}
+              className={`absolute left-12 right-0.5 overflow-hidden rounded-sm p-2 text-[13px] leading-[1.4] font-bold tracking-[0.26px] ${
+                b.candidate ? "border-2 border-dashed border-alert bg-accent-soft" : "bg-brand-soft text-brand"
+              }`}
+              style={{ top: top(b.start) + 2, height: Math.max(24, (b.end.getTime() - b.start.getTime()) / 3600000 * HOUR_PX - 4) }}
+            >
+              {b.title}
+            </div>
+          ))}
+          {gaps.map((g, i) => (
+            <p key={i} className="absolute left-[150px] text-xs leading-[1.5] font-medium text-ink-sub" style={{ top: top(g.at) + 2 }}>
+              {g.minutes >= 60 ? `${Math.floor(g.minutes / 60)}時間${g.minutes % 60 ? `${g.minutes % 60}分` : ""}あき` : `${g.minutes}分あき`}
+            </p>
+          ))}
+        </div>
+        {c.detail && current && (
+          <div className="flex w-full flex-col gap-2 rounded-md bg-brand-soft p-3">
+            <p className="flex items-start gap-1.5 text-xs leading-[1.5] font-medium">
+              <Image src="/figma/icon-sparkle-14.svg" alt="" width={16} height={16} />
+              <span className="flex-1">{c.detail}</span>
+            </p>
+            <div className="flex gap-2">
+              <button type="button" onClick={onClose} className={buttonClassName("secondary", "min-h-0 !py-2.5 !px-3")}>
+                {MARK_SYMBOL[current]}のまま
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onPick(c.id, current === "YES" ? "MAYBE" : "YES");
+                  onClose();
+                }}
+                className={buttonClassName("primary", "min-h-0 !py-2.5 !px-3")}
+              >
+                {current === "YES" ? "△にする" : "○にする"}
+              </button>
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
   );
 }
