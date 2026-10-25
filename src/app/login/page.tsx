@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/Button";
+import { devLogin, isDevLoginEnabled } from "@/lib/dev-login";
 
 // 外部サイトへ飛ばされないよう、アプリ内のパスだけ受け付ける
 function safeCallbackUrl(value: string | string[] | undefined) {
@@ -27,6 +28,8 @@ export default async function LoginPage(props: PageProps<"/login">) {
   if (session?.user) redirect(callbackUrl);
 
   const invite = await findInvite(callbackUrl);
+  const showDevLogin = await isDevLoginEnabled();
+  const showGoogle = Boolean(process.env.AUTH_GOOGLE_ID);
 
   async function signInWithGoogle() {
     "use server";
@@ -56,11 +59,24 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
         <div className="h-2" />
 
-        <form action={signInWithGoogle} className="w-full">
-          <Button type="submit" variant="secondary">
-            Googleで続ける
-          </Button>
-        </form>
+        {showGoogle && (
+          <form action={signInWithGoogle} className="w-full">
+            <Button type="submit" variant="secondary">
+              Googleで続ける
+            </Button>
+          </form>
+        )}
+
+        {showDevLogin && (
+          <form action={devLogin} className="flex w-full flex-col gap-2 rounded-md border-2 border-dashed border-brand p-3">
+            <p className="text-xs font-medium text-ink-sub">開発用ログイン（本番では出ません）</p>
+            <input type="hidden" name="callbackUrl" value={callbackUrl} />
+            <input name="name" required placeholder="名前（例: あやは）" className="rounded-md bg-sunken p-3.5 text-[15px] font-medium outline-brand" />
+            <Button type="submit" variant="secondary">
+              この名前でログイン
+            </Button>
+          </form>
+        )}
       </div>
 
       {/* 飾りの星（Figma の位置どおり） */}

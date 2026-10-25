@@ -6,6 +6,10 @@
   --color-card: #ffffff;
   --color-brand: #2e8a7f;
   --color-brand-soft: #d6ece7;
+  --color-sunken: #eaf4f1;
+  --color-muted: #cbdcd7;
+  --color-accent-soft: #fcf7c4;
+  --color-alert: #d4be00;
   --color-accent: #f4e01c;
   --color-ink: #183238;
   --color-ink-sub: #4f6f6f;
@@ -13,11 +17,16 @@
 
   --font-display: var(--font-dela-gothic-one);
   --font-sans: var(--font-zen-maru-gothic);
+  --font-dot: var(--font-dotgothic16);
 
   --radius-pill: 999px;
+  --radius-sm: 8px;
   --radius-md: 16px;
+  --radius-lg: 24px;
 
   --drop-shadow-pop: 0 4px 0 #1b1f3b;
+  --shadow-pop: 0 4px 0 0 #1b1f3b;
+  --shadow-soft: 0 6px 16px 0 rgb(27 31 59 / 0.08);
 }
 
 html {
