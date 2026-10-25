@@ -30,7 +30,7 @@ export default async function SharePage(props: PageProps<"/events/[id]/share">) 
           <br />
           相手はLINEかGoogleでログインして答えるよ。
         </p>
-        <ShareButtons url={url} title={event.title} />
+        <ShareButtons url={url} />
       </div>
 
       <Image src="/figma/s2-star-1.svg" alt="" width={40} height={40} className="pointer-events-none absolute top-[123.7px] left-[23.4px] rotate-12" />

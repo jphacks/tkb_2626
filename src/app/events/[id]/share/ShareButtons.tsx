@@ -2,51 +2,58 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { Button, buttonClassName } from "@/components/Button";
-import { lineShareUrl } from "@/lib/share";
+import { Button } from "@/components/Button";
 import { pop, tap } from "@/lib/fx";
 
-export function ShareButtons({ url, title }: { url: string; title: string }) {
-  const [copied, setCopied] = useState(false);
-  const message = `「${title}」の日程調整、回答おねがい！`;
+// クリップボード API が使えない・断られたときは、昔ながらの選択→コピーで試す
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.cssText = "position:fixed;opacity:0";
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch {
+      // コピーできない環境
+    }
+    ta.remove();
+    return ok;
+  }
+}
 
-  const copyRef = useRef<HTMLButtonElement>(null);
+// S2: リンクを見せて、コピーするだけ（送る手段は相手に合わせて自分で貼ってもらう）
+export function ShareButtons({ url }: { url: string }) {
+  const [copied, setCopied] = useState<"ok" | "ng" | null>(null);
+  const iconRef = useRef<HTMLSpanElement>(null);
 
   async function copy() {
     tap();
-    pop(copyRef.current, 1, 220);
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  async function shareOther() {
-    if (navigator.share) {
-      await navigator.share({ title, text: message, url }).catch(() => {});
-    } else {
-      await copy();
-    }
+    pop(iconRef.current, 1, 220);
+    setCopied((await copyText(url)) ? "ok" : "ng");
+    setTimeout(() => setCopied(null), 2500);
   }
 
   return (
     <>
+      {/* リンクは長押しで選んでコピーもできるよう、文字として置く */}
       <div className="flex w-full items-center gap-3 rounded-md bg-card p-4 shadow-pop">
-        <p className="min-w-0 flex-1 truncate text-[15px] leading-[1.6] font-bold">{url.replace(/^https?:\/\//, "")}</p>
-        <button ref={copyRef} type="button" onClick={copy} aria-label="リンクをコピー" className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-accent">
-          <Image src="/figma/icon-copy.svg" alt="" width={24} height={24} />
+        <span className="min-w-0 flex-1 truncate text-[15px] leading-[1.6] font-bold select-all">{url.replace(/^https?:\/\//, "")}</span>
+        <button type="button" onClick={copy} aria-label="リンクをコピー" className="shrink-0">
+          <span ref={iconRef} className="flex size-11 items-center justify-center rounded-pill bg-accent">
+            <Image src="/figma/icon-copy.svg" alt="" width={24} height={24} />
+          </span>
         </button>
       </div>
-      <p className="-my-3 h-4 text-xs font-medium text-white" aria-live="polite">
-        {copied ? "コピーしたよ" : ""}
-      </p>
-      <div className="flex w-full flex-col gap-3">
-        <a href={lineShareUrl(message, url)} target="_blank" rel="noopener noreferrer" className={buttonClassName("accent")}>
-          LINEで送る
-        </a>
-        <Button type="button" variant="secondary" onClick={shareOther}>
-          その他にシェア
-        </Button>
-      </div>
+      <Button type="button" variant="accent" onClick={copy}>
+        {copied === "ok" ? "コピーしたよ！" : "リンクをコピー"}
+      </Button>
+      {copied === "ng" && <p className="-mt-3 text-xs font-medium text-white">コピーできなかった…上のリンクを長押ししてコピーしてね</p>}
     </>
   );
 }
