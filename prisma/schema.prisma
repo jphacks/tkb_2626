@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---- Auth.js 標準（@auth/prisma-adapter） ----
+
+model User {
+  id               String            @id @default(cuid())
+  name             String?
+  email            String?           @unique
+  emailVerified    DateTime?
+  image            String?
+  onboardedAt      DateTime?
+  calendarProvider CalendarProvider?
+  reduceEffects    Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  ownedEvents    Event[]         @relation("EventOwner")
+  participations Participation[]
+  nudgesSent     Nudge[]         @relation("NudgeFrom")
+  nudgesReceived Nudge[]         @relation("NudgeTo")
+}
+
+enum CalendarProvider {
+  GOOGLE
+  MICROSOFT
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ---- アプリ ----
+
+model Event {
+  id                 String      @id @default(cuid())
+  ownerId            String
+  title              String
+  genre              Genre?
+  memo               String?
+  headcount          Int
+  priority           Priority
+  deadlineAt         DateTime
+  shareToken         String      @unique
+  status             EventStatus @default(OPEN)
+  decidedCandidateId String?     @unique
+  decidedAt          DateTime?
+  canceledAt         DateTime?
+  cancelNote         String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  owner             User            @relation("EventOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  candidates        Candidate[]     @relation("EventCandidates")
+  decidedCandidate  Candidate?      @relation("EventDecided", fields: [decidedCandidateId], references: [id])
+  participations    Participation[]
+  nudges            Nudge[]
+
+  @@index([ownerId])
+}
+
+enum Genre {
+  DRINK
+  LUNCH
+  CAMP
+  STUDY
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  URGENT
+}
+
+enum EventStatus {
+  OPEN
+  DECIDED
+  CANCELED
+}
+
+model Candidate {
+  id      String   @id @default(cuid())
+  eventId String
+  startAt DateTime
+  endAt   DateTime
+  byAi    Boolean  @default(false)
+
+  event       Event    @relation("EventCandidates", fields: [eventId], references: [id], onDelete: Cascade)
+  decidedFor  Event?   @relation("EventDecided")
+  answers     Answer[]
+
+  @@index([eventId])
+}
+
+model Participation {
+  id           String     @id @default(cuid())
+  eventId      String
+  userId       String
+  attendance   Attendance @default(PENDING)
+  note         String?
+  answeredAt   DateTime?
+  replyBy      DateTime?
+  replyByLabel String?
+  lastOpenedAt DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers Answer[]
+
+  @@unique([eventId, userId])
+  @@index([userId])
+}
+
+enum Attendance {
+  PENDING
+  ATTENDING
+  DECLINED
+}
+
+model Answer {
+  participationId String
+  candidateId     String
+  value           Mark
+  byAi            Boolean @default(false)
+  reason          String?
+  detail          String?
+
+  participation Participation @relation(fields: [participationId], references: [id], onDelete: Cascade)
+  candidate     Candidate     @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@id([participationId, candidateId])
+}
+
+enum Mark {
+  YES
+  MAYBE
+  NO
+}
+
+model Nudge {
+  id         String    @id @default(cuid())
+  eventId    String
+  fromUserId String
+  toUserId   String
+  count      Int
+  message    String?
+  token      String    @unique
+  openedAt   DateTime?
+  createdAt  DateTime  @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  from  User  @relation("NudgeFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  to    User  @relation("NudgeTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([toUserId])
+}

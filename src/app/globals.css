@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* Figma「UIデザインの部屋3」の変数 */
+@theme {
+  --color-canvas: #fafefd;
+  --color-card: #ffffff;
+  --color-brand: #2e8a7f;
+  --color-brand-soft: #d6ece7;
+  --color-accent: #f4e01c;
+  --color-ink: #183238;
+  --color-ink-sub: #4f6f6f;
+  --color-shadow: #1b1f3b;
+
+  --font-display: var(--font-dela-gothic-one);
+  --font-sans: var(--font-zen-maru-gothic);
+
+  --radius-pill: 999px;
+  --radius-md: 16px;
+
+  --drop-shadow-pop: 0 4px 0 #1b1f3b;
+}
+
+html {
+  background: var(--color-canvas);
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans), sans-serif;
+}
