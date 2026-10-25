@@ -6,7 +6,7 @@ export default function LoginSentPage() {
   return (
     <main className="flex flex-1 flex-col pt-11">
       <div className="flex flex-1 flex-col items-center gap-4 px-6 pt-10">
-        <Image src="/figma/logo-pochiplease.png" alt="ぽちぷりーず" width={220} height={84} priority />
+        <Image src="/logo-pochiplease.svg" alt="ぽちぷりーず" width={232} height={84} priority />
         <h1 className="w-full text-center font-display text-[28px] leading-[1.3]">メールを送ったよ</h1>
         <p className="w-full text-center text-[15px] leading-[1.6] font-medium text-ink-sub">
           届いたメールのリンクを開くと、そのままログインできるよ。リンクは24時間有効です。

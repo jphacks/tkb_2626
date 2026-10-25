@@ -13,7 +13,7 @@ export function TopBar({ title, backHref, tone = "ink", action }: { title?: stri
       ) : null}
       <p className={`min-w-0 flex-1 text-[17px] leading-[1.5] font-bold ${tone === "white" ? "text-white" : "text-ink"}`}>{title}</p>
       {action}
-      <Image src="/figma/logo-pochiplease.png" alt="ぽちぷりーず" width={84} height={32} />
+      <Image src="/logo-pochiplease.svg" alt="ぽちぷりーず" width={88} height={32} />
     </header>
   );
 }
