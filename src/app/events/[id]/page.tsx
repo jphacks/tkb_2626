@@ -1,11 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { buttonClassName } from "@/components/Button";
 import { Countdown } from "@/components/Countdown";
 import { TopBar } from "@/components/TopBar";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { lineShareUrl } from "@/lib/share";
+import { ManageMenu } from "./ManageMenu";
 import { initial, participantStatus, rankTallies, remainingRatio, STATUS_LABEL, tally, type ParticipantStatus } from "@/lib/status";
 import { formatDateTime, formatDay, toJstParts } from "@/lib/time";
 
@@ -28,6 +31,11 @@ export default async function EventStatusPage(props: PageProps<"/events/[id]">) 
   });
   if (!event || event.ownerId !== user.id) notFound();
   if (event.status === "DECIDED") redirect(`/events/${id}/decided`);
+  if (event.status === "CANCELED") redirect(`/events/${id}/cancel`);
+  const { saved } = await props.searchParams;
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
 
   const now = new Date();
   const open = event.status === "OPEN";
@@ -60,9 +68,26 @@ export default async function EventStatusPage(props: PageProps<"/events/[id]">) 
 
   return (
     <main className="flex flex-1 flex-col pt-11">
-      <TopBar title={event.title} backHref="/home" />
+      <TopBar
+        title={event.title}
+        backHref="/home"
+        action={<ManageMenu eventId={id} title={event.title} deadline={formatDateTime(event.deadlineAt)} headcount={event.headcount} />}
+      />
 
       <div className="flex flex-1 flex-col gap-4 px-6 pt-2 pb-6">
+        {saved === "1" && (
+          <div className="flex w-full items-center gap-3 rounded-md bg-brand-soft p-3">
+            <p className="flex-1 text-[13px] leading-[1.4] font-bold">変更を保存したよ。みんなにも知らせよう</p>
+            <a
+              href={lineShareUrl(`【${event.title}】の内容を変えたよ（締切 ${formatDateTime(event.deadlineAt)}）`, `${proto}://${host}/e/${event.shareToken}`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 rounded-pill bg-accent px-3 py-2 text-[13px] font-bold drop-shadow-pop"
+            >
+              LINEで知らせる
+            </a>
+          </div>
+        )}
         {/* 締切のカウントダウン */}
         <section className="relative flex w-full flex-col gap-3 overflow-hidden rounded-lg bg-ink px-[18px] pt-[26px] pb-[18px] shadow-pop">
           {urgent && (

@@ -68,7 +68,7 @@ export async function declareReply(token: string, label: string) {
     where: { id: participation.id },
     data: { replyBy: replyByFor(parsed), replyByLabel: parsed },
   });
-  revalidatePath(`/e/${token}/answer`);
+  redirect("/later");
 }
 
 export async function clearDeclaration(token: string) {

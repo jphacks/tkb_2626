@@ -72,3 +72,36 @@ export async function decideEvent(eventId: string, candidateId: string) {
   });
   redirect(`/events/${eventId}/decided`);
 }
+
+const EditEventInput = z.object({
+  title: z.string().trim().min(1).max(40),
+  headcount: z.number().int().min(2).max(50),
+  deadlineAt: z.coerce.date(),
+});
+
+// E1「保存する」: 名前・人数・締切だけ変えられる。保存後は S3 に戻り、LINE共有を出す
+export async function updateEvent(eventId: string, input: z.input<typeof EditEventInput>) {
+  const user = await requireUser(`/events/${eventId}/edit`);
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { ownerId: true, status: true } });
+  if (!event || event.ownerId !== user.id) throw new Error("not found");
+  if (event.status !== "OPEN") redirect(`/events/${eventId}`);
+  const data = EditEventInput.parse(input);
+  if (data.deadlineAt <= new Date()) throw new Error("締切は今より後にしてください");
+
+  await prisma.event.update({ where: { id: eventId }, data });
+  redirect(`/events/${eventId}?saved=1`);
+}
+
+// E2「中止する」: 送り手だけ。中止後は E3 へ
+export async function cancelEvent(eventId: string, note: string) {
+  const user = await requireUser(`/events/${eventId}/cancel`);
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { ownerId: true, status: true } });
+  if (!event || event.ownerId !== user.id) throw new Error("not found");
+  if (event.status === "OPEN") {
+    await prisma.event.update({
+      where: { id: eventId },
+      data: { status: "CANCELED", canceledAt: new Date(), cancelNote: note.trim().slice(0, 100) || null },
+    });
+  }
+  redirect(`/events/${eventId}/cancel`);
+}
