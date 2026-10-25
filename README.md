@@ -26,17 +26,17 @@
 #### 1. 特長1　○△×が自動で入る
 カレンダーの予定をもとに、○△×を自動で入れます。理由も表示されるので、違うところだけ直せばOKです。予定の中身は相手に見えません。
 返す時間を宣言できる
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/344a2cc4-05ac-4d34-9d63-fd00fcad884d" />
 
 #### 2. 特長2 回答期限
 「今夜21時に返す」のように、返す時間だけ先に伝えられます。幹事には宣言が届き、本人には時間の前にリマインドが届きます。
-連打で催促できる
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/168db0b6-3363-4d39-9a2b-12f1d301bd66" />
 
 #### 3. 特長3 連打
 返事がない人に「はよ〜〜！」を連打して、プレゼントとして送れます。相手が開くと、画面いっぱいに「はよ〜〜！」が降ってきます。
 
 
-<img width="200" alt="image" src="https://github.com/user-attachments/assets/ccc8c604-9b04-4762-8aae-e8bcf4202b7d" /><img width="200" alt="image" src="https://github.com/user-attachments/assets/344a2cc4-05ac-4d34-9d63-fd00fcad884d" />
-
+<img width="200" alt="image" src="https://github.com/user-attachments/assets/ccc8c604-9b04-4762-8aae-e8bcf4202b7d" />
 
 ### 解決出来ること
 * 返事待ちで日程が決まらない状態を減らせます。
