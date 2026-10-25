@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { signIn, signOut } from "@/auth";
+import { signOut } from "@/auth";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
@@ -16,11 +16,6 @@ export async function disconnectCalendar() {
   const user = await requireUser("/settings");
   await prisma.user.update({ where: { id: user.id }, data: { calendarProvider: null } });
   revalidatePath("/settings");
-}
-
-export async function connectGoogle() {
-  await requireUser("/settings");
-  await signIn("google", { redirectTo: "/settings" });
 }
 
 export async function logout() {

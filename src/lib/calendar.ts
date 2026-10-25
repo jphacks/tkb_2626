@@ -1,3 +1,4 @@
+import { MICROSOFT_ISSUER } from "@/auth";
 import { prisma } from "@/lib/db";
 import { addDays, fromJst, toJstParts } from "@/lib/time";
 
@@ -9,16 +10,22 @@ export type CalendarEvent = {
   allDay?: boolean;
 };
 
-// ユーザーの予定を取得する。Outlook（Microsoft）からの取得は実装の順番8で足す
+// ユーザーの予定を取得する（連携しているのが Google か Outlook かで分ける）
 export async function getCalendarEvents(userId: string, from: Date, to: Date): Promise<CalendarEvent[]> {
   if (process.env.DEV_FAKE_CALENDAR === "1") return fakeEvents(userId, from, to);
 
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { calendarProvider: true } });
-  if (user?.calendarProvider !== "GOOGLE") return [];
 
   try {
-    const token = await googleAccessToken(userId);
-    return token ? await fetchGoogleEvents(token, from, to) : [];
+    if (user?.calendarProvider === "GOOGLE") {
+      const token = await googleAccessToken(userId);
+      return token ? await fetchGoogleEvents(token, from, to) : [];
+    }
+    if (user?.calendarProvider === "MICROSOFT") {
+      const token = await microsoftAccessToken(userId);
+      return token ? await fetchMicrosoftEvents(token, from, to) : [];
+    }
+    return [];
   } catch (e) {
     console.error("calendar fetch failed", e);
     return [];
@@ -95,6 +102,78 @@ async function fetchGoogleEvents(token: string, from: Date, to: Date): Promise<C
       }
       return [];
     });
+}
+
+// Google と同じく、切れていればリフレッシュトークンで更新して保存する
+async function microsoftAccessToken(userId: string): Promise<string | null> {
+  const provider = "microsoft-entra-id";
+  const account = await prisma.account.findFirst({ where: { userId, provider } });
+  if (!account?.access_token) return null;
+
+  const expiresSoon = !account.expires_at || account.expires_at * 1000 < Date.now() + 60_000;
+  if (!expiresSoon) return account.access_token;
+  if (!account.refresh_token) return null;
+
+  const res = await fetch(`${MICROSOFT_ISSUER.replace(/\/v2\.0$/, "")}/oauth2/v2.0/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: process.env.AUTH_MICROSOFT_ENTRA_ID_ID ?? "",
+      client_secret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET ?? "",
+      grant_type: "refresh_token",
+      refresh_token: account.refresh_token,
+      scope: "offline_access User.Read Calendars.Read",
+    }),
+  });
+  if (!res.ok) throw new Error(`microsoft token refresh failed: ${res.status}`);
+  const json = (await res.json()) as { access_token: string; expires_in: number; refresh_token?: string };
+
+  await prisma.account.update({
+    where: { provider_providerAccountId: { provider, providerAccountId: account.providerAccountId } },
+    data: {
+      access_token: json.access_token,
+      expires_at: Math.floor(Date.now() / 1000) + json.expires_in,
+      ...(json.refresh_token ? { refresh_token: json.refresh_token } : {}),
+    },
+  });
+  return json.access_token;
+}
+
+type GraphEvent = {
+  subject?: string;
+  isAllDay?: boolean;
+  isCancelled?: boolean;
+  showAs?: string;
+  start?: { dateTime: string };
+  end?: { dateTime: string };
+  location?: { displayName?: string };
+};
+
+// 時刻は JST で返してもらい、+09:00 を付けて読む（終日の予定も JST の0時区切りになる）
+async function fetchMicrosoftEvents(token: string, from: Date, to: Date): Promise<CalendarEvent[]> {
+  const params = new URLSearchParams({
+    startDateTime: from.toISOString(),
+    endDateTime: to.toISOString(),
+    $select: "subject,isAllDay,isCancelled,showAs,start,end,location",
+    $orderby: "start/dateTime",
+    $top: "250",
+  });
+  const res = await fetch(`https://graph.microsoft.com/v1.0/me/calendarView?${params}`, {
+    headers: { Authorization: `Bearer ${token}`, Prefer: 'outlook.timezone="Tokyo Standard Time"' },
+  });
+  if (!res.ok) throw new Error(`microsoft events failed: ${res.status}`);
+  const json = (await res.json()) as { value?: GraphEvent[] };
+  const jst = (dateTime: string) => new Date(`${dateTime.slice(0, 19)}+09:00`);
+
+  return (json.value ?? [])
+    .filter((e) => !e.isCancelled && e.showAs !== "free" && e.start && e.end)
+    .map((e) => ({
+      title: e.subject || "予定",
+      start: jst(e.start!.dateTime),
+      end: jst(e.end!.dateTime),
+      location: e.location?.displayName || undefined,
+      allDay: e.isAllDay || undefined,
+    }));
 }
 
 // 開発用の仮の予定。ユーザーごとに少しずらして、毎回同じ結果になるようにする
