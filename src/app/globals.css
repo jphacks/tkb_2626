@@ -38,3 +38,9 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans), sans-serif;
 }
+
+/* 催促の開封演出: 黄色の明滅×3（1秒に3回まで） */
+@keyframes flash {
+  0%, 33%, 66% { opacity: 0.85; }
+  16%, 50%, 83%, 100% { opacity: 0; }
+}
