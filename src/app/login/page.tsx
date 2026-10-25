@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/db";
@@ -136,7 +137,11 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
       <footer className="px-6 pt-4 pb-[max(34px,env(safe-area-inset-bottom))]">
         <p className="text-center text-xs leading-[1.5] font-medium text-ink-sub">
-          続けると、利用規約とプライバシーポリシーに同意したことになります。
+          続けると、利用規約と
+          <Link href="/privacy" className="underline">
+            プライバシーポリシー
+          </Link>
+          に同意したことになります。
         </p>
       </footer>
     </main>
