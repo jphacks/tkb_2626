@@ -1,3 +1,4 @@
+<img width="240" height="360" alt="2026年10月25日連打" src="https://github.com/user-attachments/assets/3587c999-a687-4db7-b7ef-9ec10a270aba" />
 # ぽちぷりーず 
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/e5f8434b-93f7-4643-9f78-0af98bb143b4" />
 
@@ -35,7 +36,7 @@
 #### 3. 特長3 連打
 返事がない人に「はよ〜〜！」を連打して、プレゼントとして送れます。相手が開くと、画面いっぱいに「はよ〜〜！」が降ってきます。
 
-https://github.com/user-attachments/assets/33ebc779-456f-45dc-a79c-15895e39cadb
+<img width="240" height="360" alt="2026年10月25日連打" src="https://github.com/user-attachments/assets/a4f8cda7-c32d-408d-8793-de6757d3a855" />
 
 
 
