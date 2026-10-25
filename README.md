@@ -24,22 +24,22 @@
 * 全員が空いていそうな日を、最初から提案できるようにします。
 * Discordなど、ほかのチャットにも通知できるようにします。
 ### 注力したこと（こだわり等）
-* 
-* 
+* 催促を、気まずくなくしました。
+* 受け取る側はログイン不要で、通知はLINEやSlackに届きます。
 
 ## 開発技術
 ### 活用した技術
 #### API・データ
-* 
-* 
-
+* LINE Login、LINE Messaging API
+* Google Calendar API
+  
 #### フレームワーク・ライブラリ・モジュール
-* Next.js（React）＋TypeScript＋Tailwind CSS＋Framer Motion
-* 
+* Next.js（React）
+* TypeScript
+* Tailwind CSS
+* Framer Motion 
 
 #### デバイス
-* 
-* 
 
 ### 独自技術
 #### ハッカソンで開発した独自機能・技術
