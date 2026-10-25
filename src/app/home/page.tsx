@@ -207,8 +207,9 @@ async function Received(userId: string, now: Date) {
   return (
     <>
       <div className="flex items-center gap-3">
-        <Image src="/figma/mascot-sloth-received.svg" alt="" width={56} height={56} />
-        <div className="flex flex-1 flex-col gap-0.5">
+        {/* 「自分が作った」と同じ大きさのアイコンと吹き出し */}
+        <Image src="/figma/mascot-sloth-received.svg" alt="" width={64} height={64} />
+        <div className="flex flex-1 flex-col gap-0.5 rounded-md bg-card p-3 shadow-soft">
           <p className="text-[15px] leading-[1.6] font-bold">{waitingMe > 0 ? `あなたの回答待ちが ${waitingMe}件` : "回答待ちはないよ"}</p>
           {rows.length > 0 && <p className="text-xs leading-[1.5] font-medium text-ink-sub">カードをタップで回答へ</p>}
         </div>
