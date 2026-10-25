@@ -119,3 +119,9 @@ body {
   0% { transform: translateX(-3px); }
   100% { transform: translateX(3px); }
 }
+
+/* 連打：「連打しろ！！」が大きくなったり小さくなったり */
+@keyframes throb {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.18; }
+}

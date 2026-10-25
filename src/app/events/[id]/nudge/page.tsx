@@ -16,7 +16,7 @@ export default async function NudgePage(props: PageProps<"/events/[id]/nudge">) 
   const title = result.targets.length === 1 ? `${result.targets[0].name}さんを催促` : `まだの${result.targets.length}人を催促`;
 
   return (
-    <main className="flex flex-1 flex-col pt-11">
+    <main className="flex h-dvh flex-col pt-11">
       <TopBar title={title} backHref={`/events/${id}`} />
       <NudgeFlow eventId={id} to={target} targets={result.targets} />
     </main>

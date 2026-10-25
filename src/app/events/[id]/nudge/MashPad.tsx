@@ -7,6 +7,9 @@ import { buzz, lessMotion, playRandomSample, pop, preloadSamples, shake, tap } f
 import { sendNudges } from "./actions";
 
 const LIMIT = 10; // 秒
+// ボタンまわり（衝撃の絵）の位置と大きさ。ボタンは元の1.3倍
+const BTN_TOP = 128;
+const BTN_BOX = 325;
 const MASH_SOUNDS = ["/sfx/mash-1.m4a", "/sfx/mash-2.m4a"]; // 押すたびどちらかをランダムに鳴らす
 const GAUGE = 100; // ゲージが満タンになる回数
 const MAX_PILE = 140; // 積もる「はよ〜〜！」の上限（見た目だけ）
@@ -38,6 +41,18 @@ export function MashPad({ eventId, to, message }: { eventId: string; to: string;
   const burstRef = useRef<HTMLImageElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const onoId = useRef(0);
+  const areaRef = useRef<HTMLDivElement>(null);
+  // 見えている高さが低いスマホでは、ボタンまわりを縮めて1画面に収める
+  const [k, setK] = useState(1);
+  useEffect(() => {
+    const el = areaRef.current;
+    if (!el) return;
+    const fit = () => setK(Math.max(0.6, Math.min(1, (el.clientHeight - BTN_TOP - 16) / BTN_BOX)));
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // 下の段から4列ずつ、少しずらして積む
   const pile = useMemo(
@@ -93,11 +108,11 @@ export function MashPad({ eventId, to, message }: { eventId: string; to: string;
       burstRef.current?.animate([{ transform: "scale(.8)", opacity: 0.4 }, { transform: "scale(1.15)", opacity: 1 }, { transform: "scale(1)", opacity: 1 }], { duration: 180 });
       // 擬音はボタンのまわりのランダムな場所に出す
       const ang = Math.random() * Math.PI * 2;
-      const rad = 100 + Math.random() * 50;
+      const rad = 130 + Math.random() * 50;
       const id = ++onoId.current;
       setOnos((list) => [
         ...list.slice(-5),
-        { id, kind: Math.floor(Math.random() * ONOS.length), x: 171 + Math.cos(ang) * rad, y: 427 + Math.sin(ang) * rad, r: (Math.random() * 2 - 1) * 20, s: 0.55 + Math.random() * 0.4 },
+        { id, kind: Math.floor(Math.random() * ONOS.length), x: 163 + Math.cos(ang) * rad, y: BTN_TOP + (BTN_BOX * k) / 2 + Math.sin(ang) * rad * k, r: (Math.random() * 2 - 1) * 20, s: 0.55 + Math.random() * 0.4 },
       ]);
     }
   }
@@ -115,7 +130,7 @@ export function MashPad({ eventId, to, message }: { eventId: string; to: string;
 
   return (
     <>
-      <div className="relative mx-6 mt-2 flex-1 overflow-hidden rounded-lg bg-brand-soft" style={{ minHeight: 600 }}>
+      <div ref={areaRef} className="relative mx-6 mt-2 min-h-0 flex-1 overflow-hidden rounded-lg bg-brand-soft">
         {/* 積もる「はよ〜〜！」（増えた分だけ上から落ちてくる） */}
         {pile.slice(0, Math.min(count, MAX_PILE)).map((s, i) => (
           <span key={i} className="pointer-events-none absolute animate-[pile-drop_380ms_ease-in]" style={{ left: s.left, bottom: s.bottom }}>
@@ -129,7 +144,7 @@ export function MashPad({ eventId, to, message }: { eventId: string; to: string;
         ))}
 
         {/* 残り時間 */}
-        <p ref={counterRef} className={`absolute top-6 left-1/2 flex -translate-x-1/2 items-baseline gap-1.5 font-display ${urgent ? "text-urgent" : "text-brand"}`}>
+        <p ref={counterRef} className={`absolute top-3 left-1/2 flex -translate-x-1/2 items-baseline gap-1.5 font-display ${urgent ? "text-urgent" : "text-brand"}`}>
           <span className="text-[56px] leading-[1.2] tabular-nums">{left.toFixed(1)}</span>
           <span className="text-[28px] leading-[1.4]">秒</span>
         </p>
@@ -152,17 +167,27 @@ export function MashPad({ eventId, to, message }: { eventId: string; to: string;
           </p>
         ))}
 
-        <div className="absolute top-[302px] left-1/2 z-20 size-[250px] -translate-x-1/2">
-          <Image ref={burstRef} src="/figma/impact-burst.svg" alt="" width={244} height={250} className="absolute inset-0 m-auto" />
+        {/* 残り時間の下で、大きくなったり小さくなったりしてあおる */}
+        {!done && (
+          <p className="fx-loop pointer-events-none absolute top-[82px] left-1/2 z-30 -translate-x-1/2 animate-[throb_600ms_ease-in-out_infinite] font-display text-[30px] leading-[1.2] whitespace-nowrap text-urgent [text-shadow:0_3px_0_#183238]">
+            連打しろ！！
+          </p>
+        )}
+
+        <div
+          className="absolute left-1/2 z-20 origin-top -translate-x-1/2"
+          style={{ top: BTN_TOP, width: BTN_BOX, height: BTN_BOX, scale: String(k) }}
+        >
+          <Image ref={burstRef} src="/figma/impact-burst.svg" alt="" width={317} height={325} className="absolute inset-0 m-auto" />
           <button
             ref={btnRef}
             type="button"
             data-no-pop
             onClick={mash}
-            className={`absolute top-[45px] left-[47px] flex size-[155px] flex-col items-center justify-center rounded-pill bg-accent shadow-[0_3.7px_0_#183238] ${done ? "grayscale-[.7]" : ""}`}
+            className={`absolute top-[59px] left-[61px] flex size-[202px] flex-col items-center justify-center rounded-pill bg-accent shadow-[0_4.8px_0_#183238] ${done ? "grayscale-[.7]" : ""}`}
           >
-            <span className="font-display text-[42px] leading-[1.1] tabular-nums">{count}</span>
-            <span className="text-xs leading-[1.4] font-bold tracking-[0.24px]">{done ? "おわり！" : count ? "連打！" : "タップで開始"}</span>
+            <span className="font-display text-[54px] leading-[1.1] tabular-nums">{count}</span>
+            <span className="text-[15px] leading-[1.4] font-bold tracking-[0.24px]">{done ? "おわり！" : count ? "連打！" : "タップで開始"}</span>
           </button>
         </div>
       </div>

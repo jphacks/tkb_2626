@@ -18,7 +18,7 @@ export function NudgeFlow({ eventId, to, targets }: { eventId: string; to: strin
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-4 px-6 pt-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 pt-2">
         <div className="flex flex-col gap-2">
           {targets.map((t) => (
             <div key={t.id} className="flex w-full items-center gap-3 rounded-md bg-card p-3 shadow-soft">
